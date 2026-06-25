@@ -4,6 +4,19 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-25 — v1.2 Auth & DNS Recon
+
+- Added **Credential Tester** module: two-tab interface for HTTP (Basic auth + POST form) and SSH credential testing. Dictionary attack using bundled or custom username/password lists. Mandatory configurable rate-limiting delay (0–5 s). Live Treeview results with Success/Failed/Error colour coding. CSV and TXT export. Rate-limited thread-safe engine backed by `requests` (HTTP) and `paramiko` (SSH).
+- Added **DNS & Subdomain Enumerator** module: Record Lookup tab resolves A, AAAA, MX, NS, TXT records with colour-coded Treeview; Subdomain Brute-Force tab uses a 150+ entry bundled wordlist or a custom .txt file, thread-pool scanner (5–100 threads), live progress bar, and CSV/TXT export. Backed by `dnspython`.
+- Added `app/utils/file_helpers.py` — shared Browse-button / wordlist file import helper used by both new modules.
+- Extended `app/data/wordlists.py` with `SUBDOMAIN_WORDLIST` (150+ entries), `DEFAULT_USERNAMES`, and `DEFAULT_PASSWORDS`.
+- Added `dnspython>=2.4.0` and `paramiko>=3.4.0` to `requirements.txt`.
+- Updated sidebar with Cred Tester and DNS Enumerator nav items; bumped version label to v1.2.0.
+- Promoted Credential Tester and DNS Enumerator home-page cards from "Coming Soon" to "Active".
+- Marked v1.2 complete in roadmap.md.
+
+---
+
 ## 2026-06-25 (roadmap update)
 
 - Extended v1.2 Credential Tester scope to include an SSH tab (Paramiko) alongside the existing HTTP module, following review of a reference implementation using Paramiko.

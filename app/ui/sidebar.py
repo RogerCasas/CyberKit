@@ -18,10 +18,12 @@ SIDEBAR_W_COLLAPSED = 56
 
 # ── Nav items: (label, icon_char, page_key) ───────────────────────────────────
 NAV_ITEMS = [
-    ("Home",            "⌂", "home"),
-    ("Dir Fuzzer",      "⬡", "fuzzer"),
-    ("Port Scanner",    "🔍", "port_scanner"),
-    ("Header Analyser", "🛡", "header_analyser"),
+    ("Home",             "⌂",  "home"),
+    ("Dir Fuzzer",       "⬡",  "fuzzer"),
+    ("Port Scanner",     "🔍", "port_scanner"),
+    ("Header Analyser",  "🛡", "header_analyser"),
+    ("Cred Tester",      "🔑", "credential_tester"),
+    ("DNS Enumerator",   "🌐", "dns_enumerator"),
 ]
 
 
@@ -135,7 +137,7 @@ class Sidebar(ctk.CTkFrame):
 
         # ── Version label ─────────────────────────────────────────────────────
         self._version_label = ctk.CTkLabel(
-            self, text="v1.1.0",
+            self, text="v1.2.0",
             font=ctk.CTkFont(family="Segoe UI", size=10),
             text_color=TEXT_MUTED,
         )
@@ -173,7 +175,7 @@ class Sidebar(ctk.CTkFrame):
                     self._label_widgets[key].configure(text=nav_label)
             self._logo_label.configure(text="⚡ CyberKit")
             self._section_label.configure(text="MODULES")
-            self._version_label.configure(text="v1.1.0")
+            self._version_label.configure(text="v1.2.0")
             self.configure(width=SIDEBAR_W_EXPANDED)
             self._toggle_btn.configure(text="◀")
         else:

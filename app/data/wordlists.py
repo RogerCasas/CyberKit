@@ -655,3 +655,75 @@ WORDLIST = [
 # De-duplicate while preserving order
 seen = set()
 WORDLIST = [p for p in WORDLIST if not (p in seen or seen.add(p))]
+
+# ── Subdomain wordlist ────────────────────────────────────────────────────────
+SUBDOMAIN_WORDLIST = [
+    "www", "mail", "ftp", "smtp", "pop", "imap", "webmail", "email",
+    "mx", "mx1", "mx2", "ns", "ns1", "ns2", "ns3", "dns", "dns1", "dns2",
+    "api", "api2", "api-v1", "api-v2", "rest", "graphql", "gql",
+    "dev", "development", "staging", "stage", "stg", "test", "testing",
+    "demo", "sandbox", "preview", "qa", "uat", "preprod", "pre-prod",
+    "prod", "production", "live", "app", "apps", "application",
+    "admin", "administrator", "portal", "dashboard", "panel", "manage",
+    "management", "control", "cp", "cpanel", "whm", "plesk",
+    "vpn", "vpn2", "remote", "rdp", "ssh", "gateway", "gw", "proxy",
+    "firewall", "lb", "loadbalancer", "cdn", "edge", "static",
+    "assets", "media", "img", "images", "video", "upload", "uploads",
+    "files", "downloads", "docs", "doc", "documentation", "wiki", "kb",
+    "blog", "news", "forum", "forums", "community", "support",
+    "help", "helpdesk", "ticket", "tickets", "service", "servicedesk",
+    "shop", "store", "cart", "checkout", "pay", "payment", "billing",
+    "invoice", "account", "accounts", "login", "auth", "oauth",
+    "sso", "id", "identity", "secure", "security",
+    "git", "gitlab", "github", "bitbucket", "svn", "repo", "repos",
+    "ci", "jenkins", "travis", "build", "builds", "deploy", "deployments",
+    "jira", "confluence", "sonar", "nexus", "artifactory", "registry",
+    "monitor", "monitoring", "metrics", "grafana", "kibana", "elastic",
+    "logs", "log", "sentry", "newrelic", "datadog", "prometheus",
+    "db", "database", "mysql", "postgres", "postgresql", "redis",
+    "mongo", "mongodb", "elasticsearch", "cassandra", "rabbit",
+    "rabbitmq", "kafka", "zookeeper", "etcd", "consul",
+    "k8s", "kubernetes", "docker", "registry", "hub",
+    "mobile", "m", "wap", "ios", "android", "app",
+    "old", "new", "v1", "v2", "v3", "beta", "alpha", "internal",
+    "intranet", "extranet", "private", "public", "corp", "corporate",
+    "office", "vpn1", "vpn3", "backup", "bk", "archive",
+    "smtp2", "relay", "outbound", "inbound", "lists", "newsletter",
+    "status", "healthcheck", "health", "ping", "uptime",
+    "crm", "erp", "hr", "finance", "accounting", "legal",
+    "chat", "slack", "teams", "zoom", "meet", "conference",
+    "share", "sharepoint", "onedrive", "cloud", "storage",
+    "cdn2", "assets2", "web", "www2", "www3", "site", "sites",
+    "host", "hosting", "vps", "server", "servers", "node", "nodes",
+    "iot", "api3", "services", "microservices", "micro",
+    "search", "es", "solr", "elastic2",
+    "analytics", "ga", "tracking", "pixel", "tag",
+    "partner", "partners", "vendor", "client", "clients", "customers",
+    "user", "users", "profile", "profiles", "member", "members",
+    "subscription", "subscribe", "unsubscribe", "newsletter2",
+    "smtp3", "mail2", "mail3", "webmail2", "imap2", "pop3",
+    "ad", "ldap", "ldaps", "activedirectory", "exchange",
+    "sharepoint2", "owa", "outlook",
+    "satellite", "remote2", "access", "connect",
+    "uat2", "qa2", "test2", "dev2", "staging2",
+]
+
+# ── Default credential wordlists ──────────────────────────────────────────────
+DEFAULT_USERNAMES = [
+    "admin", "administrator", "root", "user", "test", "guest", "demo",
+    "operator", "manager", "support", "info", "webmaster", "sysadmin",
+    "sa", "oracle", "postgres", "mysql", "ftp", "anonymous", "ubuntu",
+    "pi", "ec2-user", "centos", "vagrant", "deploy", "git", "jenkins",
+    "tomcat", "www", "web", "service", "backup", "monitor",
+]
+
+DEFAULT_PASSWORDS = [
+    "password", "123456", "12345678", "password1", "admin", "admin123",
+    "root", "toor", "letmein", "welcome", "welcome1", "qwerty",
+    "abc123", "monkey", "dragon", "master", "login", "passw0rd",
+    "iloveyou", "sunshine", "princess", "football", "charlie",
+    "donald", "batman", "shadow", "superman", "michael",
+    "", "test", "guest", "demo", "changeme", "change_me",
+    "default", "secret", "1234", "12345", "123456789",
+    "P@ssw0rd", "P@ssword", "Pass@123", "Admin@123",
+]
