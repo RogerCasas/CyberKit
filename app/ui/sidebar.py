@@ -49,7 +49,6 @@ class Sidebar(ctk.CTkFrame):
         self._active_page  = "home"
         self._item_frames:   dict[str, ctk.CTkFrame] = {}
         self._label_widgets: dict[str, ctk.CTkLabel] = {}
-        self._hover_id = None   # pending after() id for hover auto-toggle
 
         self.grid_propagate(False)
         self._build()
@@ -136,7 +135,7 @@ class Sidebar(ctk.CTkFrame):
 
         # ── Version label ─────────────────────────────────────────────────────
         self._version_label = ctk.CTkLabel(
-            self, text="v1.0.0",
+            self, text="v1.1.0",
             font=ctk.CTkFont(family="Segoe UI", size=10),
             text_color=TEXT_MUTED,
         )
@@ -164,52 +163,28 @@ class Sidebar(ctk.CTkFrame):
             self._item_frames[key].configure(fg_color=BG_ITEM_ACTIVE)
             self._label_widgets[key].configure(text_color=ACCENT_CYAN)
 
-    # ── Hover auto-expand / auto-collapse ────────────────────────────────────
-
-    def _on_sidebar_enter(self, event):
-        """Auto-expand after a short delay when mouse enters the collapsed sidebar."""
-        if self._hover_id:
-            self.after_cancel(self._hover_id)
-            self._hover_id = None
-        if not self._expanded:
-            self._hover_id = self.after(120, self.toggle)
-
-    def _on_sidebar_leave(self, event):
-        """Auto-collapse after a delay when mouse leaves the expanded sidebar."""
-        # Ignore <Leave> events caused by moving between child widgets
-        x, y = self.winfo_pointerxy()
-        wx, wy = self.winfo_rootx(), self.winfo_rooty()
-        if wx <= x < wx + self.winfo_width() and wy <= y < wy + self.winfo_height():
-            return
-        if self._hover_id:
-            self.after_cancel(self._hover_id)
-            self._hover_id = None
-        if self._expanded:
-            self._hover_id = self.after(700, self.toggle)
-
-    # ── Toggle (instant — no animation loop) ─────────────────────────────────
+    # ── Toggle (instant — text-swap + single geometry flush) ─────────────────
 
     def toggle(self):
-        self._hover_id = None
         self._expanded = not self._expanded
         if self._expanded:
-            # Expand: set full width first, then reveal labels
+            for nav_label, _icon, key in NAV_ITEMS:
+                if key in self._label_widgets:
+                    self._label_widgets[key].configure(text=nav_label)
+            self._logo_label.configure(text="⚡ CyberKit")
+            self._section_label.configure(text="MODULES")
+            self._version_label.configure(text="v1.1.0")
             self.configure(width=SIDEBAR_W_EXPANDED)
-            self._set_text_visible(True)
             self._toggle_btn.configure(text="◀")
         else:
-            # Collapse: hide labels first, then shrink
-            self._set_text_visible(False)
+            for lbl in self._label_widgets.values():
+                lbl.configure(text="")
+            self._logo_label.configure(text="")
+            self._section_label.configure(text="")
+            self._version_label.configure(text="")
             self.configure(width=SIDEBAR_W_COLLAPSED)
             self._toggle_btn.configure(text="▶")
-
-    def _set_text_visible(self, visible: bool):
-        """Show/hide every element except the toggle button."""
-        action = "grid" if visible else "grid_remove"
-        for lbl in self._label_widgets.values():
-            getattr(lbl, action)()
-        for w in (self._logo_label, self._section_label, self._version_label):
-            getattr(w, action)()
+        self.winfo_toplevel().update_idletasks()
 
     def set_active_page(self, key: str):
         self._set_active(key)

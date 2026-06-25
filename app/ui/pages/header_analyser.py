@@ -6,7 +6,7 @@ import queue
 import threading
 import tkinter as tk
 from datetime import datetime
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, ttk
 
 import customtkinter as ctk
 
@@ -110,6 +110,13 @@ class HeaderAnalyserPage(ctk.CTkFrame):
                      font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
                      text_color=TEXT_MUTED).grid(
             row=0, column=0, padx=(18, 10), pady=(16, 4), sticky="w")
+
+        self._inline_error = ctk.CTkLabel(
+            ctrl, text="",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=CLR_MISSING, anchor="w",
+        )
+        self._inline_error.grid(row=0, column=1, sticky="w", padx=(0, 18), pady=(16, 4))
 
         self._url_entry = ctk.CTkEntry(
             ctrl,
@@ -312,12 +319,20 @@ class HeaderAnalyserPage(ctk.CTkFrame):
         )
         self._leak_label.grid(row=0, column=0, sticky="w", padx=12, pady=10)
 
+    def _set_status(self, msg: str, error: bool = False):
+        if error:
+            self._inline_error.configure(text=msg)
+        else:
+            self._inline_error.configure(text="")
+            self._status_label.configure(text=msg, text_color=TEXT_MUTED)
+
     # ── Analysis ──────────────────────────────────────────────────────────────
 
     def _start_analysis(self):
+        self._inline_error.configure(text="")
         url = self._url_entry.get().strip()
         if not url:
-            messagebox.showwarning("Missing URL", "Please enter a target URL.")
+            self._set_status("Please enter a target URL.", error=True)
             return
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
@@ -356,8 +371,7 @@ class HeaderAnalyserPage(ctk.CTkFrame):
 
         kind, url, data = payload
         if kind == "error":
-            self._status_label.configure(text=f"Error: {data}")
-            messagebox.showerror("Analysis Failed", str(data))
+            self._set_status(f"Error: {data}", error=True)
             return
 
         findings: list[HeaderFinding] = data
@@ -434,7 +448,7 @@ class HeaderAnalyserPage(ctk.CTkFrame):
 
     def _export_txt(self):
         if not self._findings:
-            messagebox.showinfo("No Data", "Run an analysis first.")
+            self._set_status("No results to export — run an analysis first.", error=True)
             return
         letter, score, max_score = compute_grade(self._findings)
         ts   = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -460,6 +474,6 @@ class HeaderAnalyserPage(ctk.CTkFrame):
                     f.write(f"{icon} {fd.rule.display} [{fd.rule.severity.upper()}]\n")
                     f.write(f"   Value : {val}\n")
                     f.write(f"   Tip   : {fd.tip}\n\n")
-            messagebox.showinfo("Export Successful", f"Saved to:\n{path}")
+            self._set_status("Export saved successfully.")
         except OSError as e:
-            messagebox.showerror("Export Failed", str(e))
+            self._set_status(f"Export failed: {e}", error=True)

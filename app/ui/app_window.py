@@ -42,16 +42,13 @@ class AppWindow(ctk.CTk):
     # ── Layout ────────────────────────────────────────────────────────────────
 
     def _build_layout(self):
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-
         # Sidebar
         self._sidebar = Sidebar(self, navigate_callback=self.show_page)
-        self._sidebar.grid(row=0, column=0, sticky="nsew")
+        self._sidebar.pack(side="left", fill="y")
 
-        # Content area
+        # Content area fills remaining space
         self._content = ctk.CTkFrame(self, fg_color=BG_CONTENT, corner_radius=0)
-        self._content.grid(row=0, column=1, sticky="nsew")
+        self._content.pack(side="left", fill="both", expand=True)
         self._content.grid_columnconfigure(0, weight=1)
         self._content.grid_rowconfigure(0, weight=1)
 

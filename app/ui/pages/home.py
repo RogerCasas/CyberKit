@@ -23,7 +23,7 @@ MODULE_CARDS = [
     {
         "icon": "⬡",
         "title": "Directory Fuzzer",
-        "desc": "Detect exposed directories and paths on a target web server using a curated 160+ entry wordlist.",
+        "desc": "Detect exposed directories and paths on a target web server using a curated 600+ entry wordlist.",
         "tag": "Active",
         "tag_color": "#22c55e",
         "page": "fuzzer",

@@ -12,7 +12,7 @@ import csv
 import queue
 import tkinter as tk
 from datetime import datetime
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, ttk
 
 import customtkinter as ctk
 
@@ -132,6 +132,13 @@ class FuzzerPage(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             text_color=TEXT_MUTED,
         ).grid(row=0, column=0, padx=(18, 10), pady=(16, 4), sticky="w")
+
+        self._inline_error = ctk.CTkLabel(
+            ctrl, text="",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=CLR_ERROR, anchor="w",
+        )
+        self._inline_error.grid(row=0, column=1, sticky="w", padx=(0, 18), pady=(16, 4))
 
         self._url_entry = ctk.CTkEntry(
             ctrl,
@@ -375,6 +382,13 @@ class FuzzerPage(ctk.CTkFrame):
         self._result_count_label.grid(row=2, column=0, sticky="e",
                                       padx=16, pady=(4, 10))
 
+    def _set_status(self, msg: str, error: bool = False):
+        if error:
+            self._inline_error.configure(text=msg)
+        else:
+            self._inline_error.configure(text="")
+            self._status_label.configure(text=msg, text_color=TEXT_MUTED)
+
     # ── Scan control ──────────────────────────────────────────────────────────
 
     def _on_thread_slider(self, val):
@@ -387,9 +401,10 @@ class FuzzerPage(ctk.CTkFrame):
             self._start_scan()
 
     def _start_scan(self):
+        self._inline_error.configure(text="")
         url = self._url_entry.get().strip()
         if not url:
-            messagebox.showwarning("Missing URL", "Please enter a target URL.")
+            self._set_status("Please enter a target URL.", error=True)
             return
 
         # Reset state
@@ -570,7 +585,7 @@ class FuzzerPage(ctk.CTkFrame):
 
     def _export(self, fmt: str):
         if not self._all_results:
-            messagebox.showinfo("No Data", "Run a scan first before exporting.")
+            self._set_status("No results to export — run a scan first.", error=True)
             return
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -592,9 +607,9 @@ class FuzzerPage(ctk.CTkFrame):
                 self._write_csv(path)
             else:
                 self._write_txt(path)
-            messagebox.showinfo("Export Successful", f"Results saved to:\n{path}")
+            self._set_status("Export saved successfully.")
         except OSError as e:
-            messagebox.showerror("Export Failed", str(e))
+            self._set_status(f"Export failed: {e}", error=True)
 
     def _write_csv(self, path: str):
         with open(path, "w", newline="", encoding="utf-8") as f:

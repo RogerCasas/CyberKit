@@ -39,7 +39,7 @@ Key infrastructure shipped in v1.0:
 | **Credential Tester** | Auth / Brute-force | HTTP form-based + Basic auth dictionary attack |
 | **DNS & Subdomain Enumerator** | Recon / OSINT | DNS record lookup + wordlist-based subdomain brute-force |
 
-**Credential Tester** — hydra-inspired (HTTP only). Supply a login URL, username list, and password list; the engine tries combinations and reports successes. Teaches HTTP auth flows without enabling mass attacks (rate-limiting built in).
+**Credential Tester** — hydra-inspired. Two tabs: (1) HTTP — supply a login URL, username list, and password list; tries combinations and reports successes; (2) SSH — supply a host, username list, and password list; uses Paramiko to test SSH login. Teaches HTTP auth flows and the SSH protocol without enabling mass attacks (rate-limiting built in).
 
 **DNS & Subdomain Enumerator** — theHarvester/Sublist3r-inspired. Resolve A, AAAA, MX, TXT, NS records; brute-force subdomains from a wordlist; display a live table of discovered hosts.
 
@@ -65,13 +65,14 @@ Key infrastructure shipped in v1.0:
 
 These are not scheduled; they become candidates when a milestone is complete.
 
-| Idea | Inspired by |
-|---|---|
-| SSL/TLS Certificate Analyser | SSLyze, testssl.sh |
-| WHOIS & IP Geolocation | whois, ipinfo.io |
-| HTTP Request Builder / Replay | curl, Postman |
-| SQL Injection Tester (basic) | sqlmap (GET/POST detection only) |
-| Password / Wordlist Generator | crunch, CeWL |
+| Idea | Inspired by | Notes |
+|---|---|---|
+| SSL/TLS Certificate Analyser | SSLyze, testssl.sh | |
+| WHOIS & IP Geolocation | whois, ipinfo.io | |
+| HTTP Request Builder / Replay | curl, Postman | |
+| SQL Injection Tester (basic) | sqlmap (GET/POST detection only) | |
+| Password / Wordlist Generator | crunch, CeWL | |
+| ARP Scanner | Scapy ARP broadcast | Requires admin/root and Scapy (C extension); teaches layer-2 topology and MAC address resolution |
 
 ---
 

@@ -6,7 +6,7 @@ import csv
 import queue
 import tkinter as tk
 from datetime import datetime
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, ttk
 
 import customtkinter as ctk
 
@@ -125,6 +125,13 @@ class PortScannerPage(ctk.CTkFrame):
                      font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
                      text_color=TEXT_MUTED).grid(
             row=0, column=0, padx=(18, 10), pady=(16, 4), sticky="w")
+
+        self._inline_error = ctk.CTkLabel(
+            ctrl, text="",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=CLR_ERROR, anchor="w",
+        )
+        self._inline_error.grid(row=0, column=1, sticky="w", padx=(0, 18), pady=(16, 4))
 
         self._host_entry = ctk.CTkEntry(
             ctrl,
@@ -451,6 +458,13 @@ class PortScannerPage(ctk.CTkFrame):
     def _on_timeout_slider(self, val):
         self._timeout_val.configure(text=f"{val:.1f} s")
 
+    def _set_status(self, msg: str, error: bool = False):
+        if error:
+            self._inline_error.configure(text=msg)
+        else:
+            self._inline_error.configure(text="")
+            self._status_label.configure(text=msg, text_color=TEXT_MUTED)
+
     # ── Scan control ──────────────────────────────────────────────────────────
 
     def _toggle_scan(self):
@@ -460,9 +474,10 @@ class PortScannerPage(ctk.CTkFrame):
             self._start_scan()
 
     def _start_scan(self):
+        self._inline_error.configure(text="")
         host = self._host_entry.get().strip()
         if not host:
-            messagebox.showwarning("Missing Host", "Please enter a target host or IP.")
+            self._set_status("Please enter a target host or IP address.", error=True)
             return
 
         mode = self._mode.get()
@@ -471,13 +486,13 @@ class PortScannerPage(ctk.CTkFrame):
                 p_from = int(self._from_entry.get().strip() or "1")
                 p_to   = int(self._to_entry.get().strip() or "1024")
             except ValueError:
-                messagebox.showerror("Invalid Range", "Port range must be integers.")
+                self._set_status("Port range values must be integers.", error=True)
                 return
             if not (1 <= p_from <= 65535 and 1 <= p_to <= 65535):
-                messagebox.showerror("Invalid Range", "Ports must be between 1 and 65535.")
+                self._set_status("Ports must be between 1 and 65535.", error=True)
                 return
             if p_from > p_to:
-                messagebox.showerror("Invalid Range", "From port must be ≤ To port.")
+                self._set_status("'From' port must be ≤ 'To' port.", error=True)
                 return
             ports = list(range(p_from, p_to + 1))
         else:
@@ -667,7 +682,7 @@ class PortScannerPage(ctk.CTkFrame):
 
     def _export(self, fmt: str):
         if not self._all_results:
-            messagebox.showinfo("No Data", "Run a scan first.")
+            self._set_status("No results to export — run a scan first.", error=True)
             return
         ts   = datetime.now().strftime("%Y%m%d_%H%M%S")
         path = filedialog.asksaveasfilename(
@@ -684,9 +699,9 @@ class PortScannerPage(ctk.CTkFrame):
                 self._write_csv(path)
             else:
                 self._write_txt(path)
-            messagebox.showinfo("Export Successful", f"Saved to:\n{path}")
+            self._set_status("Export saved successfully.")
         except OSError as e:
-            messagebox.showerror("Export Failed", str(e))
+            self._set_status(f"Export failed: {e}", error=True)
 
     def _write_csv(self, path: str):
         with open(path, "w", newline="", encoding="utf-8") as f:

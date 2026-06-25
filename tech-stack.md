@@ -16,6 +16,7 @@
 | Concurrency | **concurrent.futures.ThreadPoolExecutor** | I/O-bound tasks (HTTP, TCP) — threads outperform async here for simplicity |
 | TCP port scanning | **socket** (stdlib) | Connect scan only; no raw sockets needed (avoids admin privileges) |
 | DNS resolution | **dnspython** | A/AAAA/MX/NS/TXT lookups + subdomain brute-force |
+| SSH credential testing | **Paramiko** | SSH login attempts; pure-Python SSH client, no system ssh binary needed |
 
 ## Cryptanalysis
 
@@ -42,7 +43,7 @@ Single project folder, launched with `python main.py`. All dependencies installa
 
 ## Key Constraints
 
-- **No admin/root required** — TCP connect scans only (no raw socket ICMP or SYN scans).
+- **No admin/root required** — TCP connect scans only (no raw socket ICMP or SYN scans). Exception: the future ARP Scanner candidate requires Scapy + elevated privileges and is explicitly noted as such in the roadmap.
 - **No C extensions** — avoids compilation friction on lab machines.
 - **Windows-first** — tested on Windows 11; CustomTkinter and ttk render correctly; Bash tool (Git Bash) and PowerShell both supported.
 
@@ -54,9 +55,11 @@ Single project folder, launched with `python main.py`. All dependencies installa
 customtkinter>=5.2.0
 requests>=2.31.0
 dnspython>=2.4.0
+paramiko>=3.4.0
 ```
 
 > `dnspython` is added in v1.2 when the DNS Enumerator module ships.
+> `paramiko` is added in v1.2 when the SSH tab of the Credential Tester ships.
 
 ---
 
