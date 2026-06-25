@@ -31,10 +31,10 @@ MODULE_CARDS = [
     {
         "icon": "🔍",
         "title": "Port Scanner",
-        "desc": "Scan open TCP/UDP ports on a target host. Identify running services and potential entry points.",
-        "tag": "Coming Soon",
-        "tag_color": TEXT_MUTED,
-        "page": None,
+        "desc": "Scan open TCP ports on a target host. Identify running services and potential entry points.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "port_scanner",
     },
     {
         "icon": "🔑",
@@ -45,12 +45,12 @@ MODULE_CARDS = [
         "page": None,
     },
     {
-        "icon": "🌐",
+        "icon": "🛡",
         "title": "Header Analyser",
         "desc": "Inspect HTTP security headers for misconfigurations: CSP, HSTS, X-Frame-Options, and more.",
-        "tag": "Coming Soon",
-        "tag_color": TEXT_MUTED,
-        "page": None,
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "header_analyser",
     },
 ]
 

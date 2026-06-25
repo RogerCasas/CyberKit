@@ -19,12 +19,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v1.1 — Network & Header Visibility
+## v1.1 — Network & Header Visibility ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **Port Scanner** | Network / Recon | TCP connect scan + optional banner grab |
-| **Header Analyser** | Web / Security audit | HTTP response header inspection vs. OWASP baseline |
+| **Port Scanner** | Network / Recon | TCP connect scan + optional banner grab | ✅ Done |
+| **Header Analyser** | Web / Security audit | HTTP response header inspection vs. OWASP baseline | ✅ Done |
 
 **Port Scanner** — nmap-inspired. Enter a host + port range, get a live table of open/closed/filtered ports with service guesses. Teaches the TCP handshake and common port numbers.
 
