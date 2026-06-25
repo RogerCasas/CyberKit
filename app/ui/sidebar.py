@@ -18,9 +18,10 @@ SIDEBAR_W_COLLAPSED = 56
 
 # ── Nav items: (label, icon_char, page_key) ───────────────────────────────────
 NAV_ITEMS = [
-    ("Home",       "⌂", "home"),
-    ("Dir Fuzzer", "⬡", "fuzzer"),
-    # Future modules go here
+    ("Home",            "⌂", "home"),
+    ("Dir Fuzzer",      "⬡", "fuzzer"),
+    ("Port Scanner",    "🔍", "port_scanner"),
+    ("Header Analyser", "🛡", "header_analyser"),
 ]
 
 
@@ -142,10 +143,6 @@ class Sidebar(ctk.CTkFrame):
         self._version_label.grid(row=99, column=0, pady=(0, 12))
 
         self._set_active("home")
-
-        # Hover bindings for auto-expand / auto-collapse
-        self.bind("<Enter>", self._on_sidebar_enter)
-        self.bind("<Leave>", self._on_sidebar_leave)
 
     # ── Interaction ───────────────────────────────────────────────────────────
 

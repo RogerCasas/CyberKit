@@ -9,8 +9,8 @@
 | # | Module | Spec | Status |
 |---|---|---|---|
 | 01 | Directory Fuzzer | [specs/01-dir-fuzzer.md](specs/01-dir-fuzzer.md) | ✅ v1.0 |
-| 02 | Port Scanner | specs/02-port-scanner.md | 📋 Next |
-| 03 | Header Analyser | specs/03-header-analyser.md | 📋 Planned |
+| 02 | Port Scanner | [specs/2026-06-25-v1.1-network-header/](specs/2026-06-25-v1.1-network-header/) | ✅ v1.1 |
+| 03 | Header Analyser | [specs/2026-06-25-v1.1-network-header/](specs/2026-06-25-v1.1-network-header/) | ✅ v1.1 |
 | 04 | Credential Tester | specs/04-credential-tester.md | 📋 Planned |
 | 05 | DNS & Subdomain Enumerator | specs/05-dns-enumerator.md | 📋 Planned |
 | 06 | Tech Fingerprinter | specs/06-tech-fingerprinter.md | 📋 Planned |
