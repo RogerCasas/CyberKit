@@ -31,6 +31,21 @@ WARNING_TEXT   = "#f0a500"
 
 POLL_MS = 100
 
+_ERROR_ENTRIES = [
+    ("'",   "Unclosed single-quote — triggers syntax errors in most databases"),
+    ('"',   "Unclosed double-quote — MySQL ANSI_QUOTES and generic fallback"),
+    ("\\",  "Backslash escape — MySQL: escapes the closing quote, leaving the string open"),
+    ("')",  "Quote + close-paren — targets WHERE (col='value') contexts"),
+]
+
+_BOOL_ENTRIES = [
+    ("AND (string)",  "' AND 1=1--",    "' AND 1=2--",    "Standard string context"),
+    ("AND (numeric)", " AND 1=1",        " AND 1=2",        "Numeric column, no quote needed"),
+    ("OR (string)",   "' OR '1'='1'--",  "' OR '1'='2'--",  "OR variant for string context"),
+    ("AND (bracket)", "') AND ('1'='1",  "') AND ('1'='2",  "Bracketed WHERE (col='value')"),
+    ("OR (numeric)",  "' OR 1=1--",      "' OR 1=2--",      "OR variant for numeric context"),
+]
+
 
 class SqliTesterPage(ctk.CTkFrame):
     def __init__(self, parent, **kwargs):
@@ -41,17 +56,28 @@ class SqliTesterPage(ctk.CTkFrame):
         self._poll_id = None
         self._row_count = 0
         self._params: list[str] = []
-        self._param_row_frames: dict = {}   # param_name → CTkFrame
+        self._param_row_frames: dict = {}
+        self._payloads_expanded = False
         self._build()
 
     # ── Build ─────────────────────────────────────────────────────────────────
 
     def _build(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        # Scrollable container — all content lives here so the page scrolls
+        # when the payloads panel is expanded or the window is short
+        self._scroll = ctk.CTkScrollableFrame(
+            self, fg_color=BG_MAIN, corner_radius=0,
+            scrollbar_button_color=BORDER_COLOR,
+            scrollbar_button_hover_color=TEXT_DIM,
+        )
+        self._scroll.grid(row=0, column=0, sticky="nsew")
+        self._scroll.grid_columnconfigure(0, weight=1)
 
         # Header
-        hdr = ctk.CTkFrame(self, fg_color="transparent")
+        hdr = ctk.CTkFrame(self._scroll, fg_color="transparent")
         hdr.grid(row=0, column=0, sticky="ew", padx=30, pady=(28, 0))
         hdr.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(
@@ -67,7 +93,7 @@ class SqliTesterPage(ctk.CTkFrame):
         ).grid(row=1, column=0, sticky="w", pady=(4, 0))
 
         # Disclaimer
-        banner = ctk.CTkFrame(self, fg_color=WARNING_BG, corner_radius=8,
+        banner = ctk.CTkFrame(self._scroll, fg_color=WARNING_BG, corner_radius=8,
                               border_width=1, border_color=WARNING_BORDER)
         banner.grid(row=1, column=0, sticky="ew", padx=30, pady=(16, 0))
         banner.grid_columnconfigure(1, weight=1)
@@ -82,10 +108,11 @@ class SqliTesterPage(ctk.CTkFrame):
 
         self._build_controls()
         self._build_params()
+        self._build_payloads_panel()
         self._build_table()
 
     def _build_controls(self):
-        ctrl = ctk.CTkFrame(self, fg_color=BG_CARD, corner_radius=12,
+        ctrl = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
                             border_width=1, border_color=BORDER_COLOR)
         ctrl.grid(row=2, column=0, sticky="ew", padx=30, pady=(14, 0))
         ctrl.grid_columnconfigure(1, weight=1)
@@ -116,7 +143,6 @@ class SqliTesterPage(ctk.CTkFrame):
         btn_row = ctk.CTkFrame(ctrl, fg_color="transparent")
         btn_row.grid(row=2, column=0, columnspan=2, sticky="w", padx=18, pady=(0, 14))
 
-        # Method toggle
         self._method = "GET"
         self._get_btn = ctk.CTkButton(
             btn_row, text="GET",
@@ -165,12 +191,11 @@ class SqliTesterPage(ctk.CTkFrame):
         self._status_lbl.grid(row=0, column=4)
 
     def _build_params(self):
-        card = ctk.CTkFrame(self, fg_color=BG_CARD, corner_radius=12,
+        card = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
                             border_width=1, border_color=BORDER_COLOR)
         card.grid(row=3, column=0, sticky="ew", padx=30, pady=(10, 0))
         card.grid_columnconfigure(0, weight=1)
 
-        # Header row
         top = ctk.CTkFrame(card, fg_color="transparent")
         top.grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 4))
         top.grid_columnconfigure(0, weight=1)
@@ -197,7 +222,6 @@ class SqliTesterPage(ctk.CTkFrame):
             command=self._parse_params_from_url,
         ).grid(row=0, column=2)
 
-        # Scrollable list
         self._params_scroll = ctk.CTkScrollableFrame(
             card, height=70, fg_color="transparent", corner_radius=0,
             scrollbar_button_color=BORDER_COLOR,
@@ -213,7 +237,6 @@ class SqliTesterPage(ctk.CTkFrame):
         )
         self._params_placeholder.pack(pady=8)
 
-        # Add-param row
         add_row = ctk.CTkFrame(card, fg_color="transparent")
         add_row.grid(row=2, column=0, sticky="w", padx=12, pady=(0, 10))
 
@@ -236,10 +259,115 @@ class SqliTesterPage(ctk.CTkFrame):
             command=self._add_param_from_entry,
         ).grid(row=0, column=1)
 
+    def _build_payloads_panel(self):
+        card = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
+                            border_width=1, border_color=BORDER_COLOR)
+        card.grid(row=4, column=0, sticky="ew", padx=30, pady=(10, 0))
+        card.grid_columnconfigure(0, weight=1)
+
+        hdr = ctk.CTkFrame(card, fg_color="transparent", cursor="hand2")
+        hdr.grid(row=0, column=0, sticky="ew", padx=4, pady=0)
+        hdr.grid_columnconfigure(1, weight=1)
+
+        self._payloads_arrow = ctk.CTkLabel(
+            hdr, text="▶",
+            font=ctk.CTkFont(family="Segoe UI", size=10),
+            text_color=TEXT_DIM,
+        )
+        self._payloads_arrow.grid(row=0, column=0, padx=(10, 6), pady=10)
+
+        ctk.CTkLabel(
+            hdr, text="Payloads used",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text_color=TEXT_MUTED, anchor="w",
+        ).grid(row=0, column=1, sticky="w", pady=10)
+
+        ctk.CTkLabel(
+            hdr,
+            text="4 error payloads  •  5 boolean probe sets",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=TEXT_DIM, anchor="e",
+        ).grid(row=0, column=2, sticky="e", padx=(0, 14), pady=10)
+
+        for widget in (hdr, self._payloads_arrow) + tuple(hdr.winfo_children()):
+            widget.bind("<Button-1>", lambda e: self._toggle_payloads())
+        hdr.bind("<Enter>", lambda e: hdr.configure(fg_color=BG_INPUT))
+        hdr.bind("<Leave>", lambda e: hdr.configure(fg_color="transparent"))
+
+        self._payloads_body = ctk.CTkFrame(card, fg_color="transparent")
+        self._payloads_body.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
+        self._payloads_body.grid_columnconfigure((0, 1), weight=1)
+        self._payloads_body.grid_remove()
+
+        err_sec = ctk.CTkFrame(self._payloads_body, fg_color="transparent")
+        err_sec.grid(row=0, column=0, sticky="new", padx=(0, 16))
+
+        ctk.CTkLabel(
+            err_sec, text="ERROR PAYLOADS",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            text_color=TEXT_DIM, anchor="w",
+        ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
+
+        for i, (payload, desc) in enumerate(_ERROR_ENTRIES):
+            ctk.CTkLabel(
+                err_sec, text=payload,
+                font=ctk.CTkFont(family="Consolas", size=12),
+                text_color=ACCENT_CYAN, fg_color=BG_INPUT,
+                corner_radius=4, padx=8, pady=2,
+            ).grid(row=i + 1, column=0, sticky="w", padx=(0, 10), pady=3)
+            ctk.CTkLabel(
+                err_sec, text=desc,
+                font=ctk.CTkFont(family="Segoe UI", size=11),
+                text_color=TEXT_MUTED, anchor="w",
+            ).grid(row=i + 1, column=1, sticky="w", pady=3)
+
+        bool_sec = ctk.CTkFrame(self._payloads_body, fg_color="transparent")
+        bool_sec.grid(row=0, column=1, sticky="new")
+        bool_sec.grid_columnconfigure(2, weight=1)
+
+        ctk.CTkLabel(
+            bool_sec, text="BOOLEAN PROBE SETS",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            text_color=TEXT_DIM, anchor="w",
+        ).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0, 6))
+
+        for i, (label, true_p, false_p, purpose) in enumerate(_BOOL_ENTRIES):
+            ctk.CTkLabel(
+                bool_sec, text=label,
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                text_color=TEXT_PRIMARY, anchor="w", width=100,
+            ).grid(row=i + 1, column=0, sticky="w", padx=(0, 8), pady=3)
+            ctk.CTkLabel(
+                bool_sec, text=true_p,
+                font=ctk.CTkFont(family="Consolas", size=11),
+                text_color=CLR_OK, fg_color=BG_INPUT,
+                corner_radius=4, padx=6, pady=2,
+            ).grid(row=i + 1, column=1, sticky="w", padx=(0, 4), pady=3)
+            ctk.CTkLabel(
+                bool_sec, text=false_p,
+                font=ctk.CTkFont(family="Consolas", size=11),
+                text_color=CLR_ERROR, fg_color=BG_INPUT,
+                corner_radius=4, padx=6, pady=2,
+            ).grid(row=i + 1, column=2, sticky="w", padx=(0, 10), pady=3)
+            ctk.CTkLabel(
+                bool_sec, text=purpose,
+                font=ctk.CTkFont(family="Segoe UI", size=11),
+                text_color=TEXT_DIM, anchor="w",
+            ).grid(row=i + 1, column=3, sticky="w", pady=3)
+
+    def _toggle_payloads(self):
+        self._payloads_expanded = not self._payloads_expanded
+        if self._payloads_expanded:
+            self._payloads_body.grid()
+            self._payloads_arrow.configure(text="▼")
+        else:
+            self._payloads_body.grid_remove()
+            self._payloads_arrow.configure(text="▶")
+
     def _build_table(self):
-        wrapper = ctk.CTkFrame(self, fg_color=BG_CARD, corner_radius=12,
+        wrapper = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
                                border_width=1, border_color=BORDER_COLOR)
-        wrapper.grid(row=4, column=0, sticky="nsew", padx=30, pady=(10, 30))
+        wrapper.grid(row=5, column=0, sticky="ew", padx=30, pady=(10, 30))
         wrapper.grid_columnconfigure(0, weight=1)
         wrapper.grid_rowconfigure(1, weight=1)
 
@@ -292,6 +420,7 @@ class SqliTesterPage(ctk.CTkFrame):
             show="headings",
             style="SQLi.Treeview",
             yscrollcommand=vsb.set,
+            height=10,
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")
@@ -349,7 +478,6 @@ class SqliTesterPage(ctk.CTkFrame):
             self._parse_error.configure(text="No query parameters found.")
             return
 
-        # Clear existing
         for w in self._params_scroll.winfo_children():
             w.destroy()
         self._params.clear()
