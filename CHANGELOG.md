@@ -4,6 +4,13 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-26 — Roadmap Replanning
+
+- Restructured `roadmap.md`: promoted all six v2.x future candidates into three scheduled milestones — v3.0 (SSL/TLS Certificate Analyser + WHOIS & IP Geolocation), v3.1 (HTTP Request Builder + SQL Injection Tester), and v3.2 (Password/Wordlist Generator + ARP Scanner). Each milestone now has a full description table and module summaries.
+- Updated `tech-stack.md`: added `python-whois` (v3.0) and `scapy` (v3.2) to the networking dependency table; updated the dependency file block with version pins and per-milestone comments; updated the admin/root constraint note to reference v3.2 instead of "future candidate".
+
+---
+
 ## 2026-06-26 — v2.0 Analysis & CTF Utilities
 
 - Added **Encoder / Decoder** module: bidirectional transforms for URL encoding, Base64, Base64 URL-safe, HTML entities, hex, and ROT-13; JWT Inspect mode decodes the header and payload of a JWT without verifying the signature. All operations use stdlib only (`urllib.parse`, `base64`, `html`, `codecs`, `hashlib`). 14 automated engine tests.
