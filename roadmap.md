@@ -74,12 +74,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v3.1 — Web Attack Utilities
+## v3.1 — Web Attack Utilities ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **HTTP Request Builder / Replay** | Web / Testing | Custom method, headers, and body; full response inspection |
-| **SQL Injection Tester (basic)** | Web / Exploitation | Error-based + boolean SQLi payload injection into GET/POST parameters |
+| **HTTP Request Builder / Replay** | Web / Testing | Custom method, headers, and body; full response inspection | ✅ Done |
+| **SQL Injection Tester (basic)** | Web / Exploitation | Error-based + boolean SQLi payload injection into GET/POST parameters | ✅ Done |
 
 **HTTP Request Builder / Replay** — curl/Postman-inspired. Choose method (GET/POST/PUT/DELETE/…), set arbitrary headers, supply a request body, and send. View the full response (status, headers, body). Teaches raw HTTP semantics and is a natural prerequisite to manual injection testing.
 
