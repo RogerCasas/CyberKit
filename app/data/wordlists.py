@@ -706,6 +706,89 @@ SUBDOMAIN_WORDLIST = [
     "sharepoint2", "owa", "outlook",
     "satellite", "remote2", "access", "connect",
     "uat2", "qa2", "test2", "dev2", "staging2",
+    # ── Infrastructure / network ───────────────────────────────────────────────
+    "sftp", "sftp2", "ssh2", "bastion", "jump", "jumphost",
+    "waf", "ids", "ips", "ntp", "syslog", "siem",
+    "dc1", "dc2", "ha", "dr",
+    "api-gateway", "apigw", "mgmt", "network2", "nat", "dhcp",
+    # ── More dev / staging environments ───────────────────────────────────────
+    "dev3", "dev4", "dev5", "test3", "test4", "test5",
+    "staging3", "qa3", "qa4", "poc", "lab", "labs",
+    "sandbox2", "release", "beta2", "hotfix", "preprod2", "alpha2",
+    # ── More app instances ────────────────────────────────────────────────────
+    "app2", "app3", "app4", "app5", "app6",
+    "web2", "web3", "web4", "www4", "www5",
+    "portal2", "panel2",
+    # ── More mail / messaging ─────────────────────────────────────────────────
+    "mail4", "mail5", "mail6", "mail-dev",
+    "postmaster", "abuse", "noreply", "no-reply",
+    "spam", "dkim", "dmarc", "mta", "bounce",
+    "mx3", "mx4", "mx5", "smtp4", "imap3", "pop3",
+    # ── More DNS / NS ─────────────────────────────────────────────────────────
+    "ns4", "ns5", "ns6", "ns7", "ns8",
+    "dns3", "dns4", "dns5", "dns6",
+    # ── More CDN / media ──────────────────────────────────────────────────────
+    "cdn3", "cdn4", "cdn5",
+    "img2", "img3", "img4",
+    "static2", "static3",
+    "media2", "media3",
+    "stream", "streaming", "live2",
+    "thumb", "thumbnails", "resize",
+    # ── Monitoring / observability ────────────────────────────────────────────
+    "ops", "devops", "infra", "sre",
+    "observability", "otel", "apm",
+    "trace", "tracing",
+    "stats", "reporting", "metrics2", "dashboard2",
+    # ── Auth / identity ───────────────────────────────────────────────────────
+    "auth2", "id2", "sso2",
+    "oidc", "openid", "saml", "cas", "idp",
+    # ── More databases ────────────────────────────────────────────────────────
+    "db2", "db3", "data", "data2", "data3",
+    "mysql2", "postgres2", "mongo2",
+    "redis2", "redis3",
+    "kafka2", "rabbit2", "mq", "queue2",
+    "neo4j", "graph", "influxdb", "clickhouse",
+    # ── CI/CD / DevOps tools ──────────────────────────────────────────────────
+    "gitea", "gitops", "code2",
+    "ci2", "cd", "pipeline",
+    "build2", "sonar2", "nexus2",
+    "harbor", "ecr", "registry2",
+    "helm", "kube", "k8s2",
+    "vault2", "secrets",
+    "terraform", "ansible", "puppet",
+    # ── Integration / protocols ───────────────────────────────────────────────
+    "hook", "events2", "pubsub",
+    "grpc", "ws", "wss", "rpc",
+    # ── Business / enterprise ─────────────────────────────────────────────────
+    "intranet2", "corp2",
+    "careers", "jobs2", "press",
+    "privacy", "info2",
+    "shop2", "store2", "ecommerce",
+    "payment2", "billing2",
+    "crm2", "erp2", "hrm",
+    # ── Analytics / BI ────────────────────────────────────────────────────────
+    "solr2", "es2", "insights", "bi",
+    "metabase", "redash", "tableau",
+    # ── Misc additional ───────────────────────────────────────────────────────
+    "rss", "feed",
+    "api-dev", "api-staging", "api-test", "api-prod", "api-int",
+    "dev-api", "staging-api", "test-api",
+    "m2", "m3",
+    "node2", "node3",
+    "host2", "host3",
+    "server2", "server3", "server4",
+    "vpn4", "vpn5", "vpn6", "vpn-gateway",
+    "geo", "maps",
+    "assets3", "assets4",
+    "files2", "files3",
+    "docs2", "docs3",
+    "help2", "faq",
+    "kb2", "forum2", "community2",
+    "review", "reviews", "feedback", "survey",
+    "nginx", "apache", "traefik", "haproxy",
+    "uat3", "backup2", "bkup",
+    "wireless", "wifi",
+    "go", "redirect",
 ]
 
 # ── Default credential wordlists ──────────────────────────────────────────────
