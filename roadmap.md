@@ -61,18 +61,42 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v2.x — Future Candidates
+## v3.0 — Passive Recon Expansion
 
-These are not scheduled; they become candidates when a milestone is complete.
-
-| Idea | Inspired by | Notes |
+| Module | Category | Core technique |
 |---|---|---|
-| SSL/TLS Certificate Analyser | SSLyze, testssl.sh | |
-| WHOIS & IP Geolocation | whois, ipinfo.io | |
-| HTTP Request Builder / Replay | curl, Postman | |
-| SQL Injection Tester (basic) | sqlmap (GET/POST detection only) | |
-| Password / Wordlist Generator | crunch, CeWL | |
-| ARP Scanner | Scapy ARP broadcast | Requires admin/root and Scapy (C extension); teaches layer-2 topology and MAC address resolution |
+| **SSL/TLS Certificate Analyser** | Web / Recon | TLS handshake → certificate chain inspection, expiry, SANs, cipher suites |
+| **WHOIS & IP Geolocation** | Recon / OSINT | Domain WHOIS registration data + IP geolocation via public APIs |
+
+**SSL/TLS Certificate Analyser** — SSLyze-inspired. Connect to a host over TLS, retrieve the certificate chain, and display expiry date, issuer, subject alternative names, and supported cipher suites. Flags expired, near-expiry (< 30 days), and self-signed certificates.
+
+**WHOIS & IP Geolocation** — whois + ipinfo.io-inspired. Enter a domain or IP; retrieve WHOIS registration data (registrar, creation/expiry dates, registrant org) and geographic IP context (country, city, ASN). Two-tab layout.
+
+---
+
+## v3.1 — Web Attack Utilities
+
+| Module | Category | Core technique |
+|---|---|---|
+| **HTTP Request Builder / Replay** | Web / Testing | Custom method, headers, and body; full response inspection |
+| **SQL Injection Tester (basic)** | Web / Exploitation | Error-based + boolean SQLi payload injection into GET/POST parameters |
+
+**HTTP Request Builder / Replay** — curl/Postman-inspired. Choose method (GET/POST/PUT/DELETE/…), set arbitrary headers, supply a request body, and send. View the full response (status, headers, body). Teaches raw HTTP semantics and is a natural prerequisite to manual injection testing.
+
+**SQL Injection Tester (basic)** — sqlmap-inspired (detection only, no extraction). Inject common SQL error payloads into GET/POST parameters; detect error-based and boolean-based signatures in the response. Covers detection, not exploitation.
+
+---
+
+## v3.2 — Password & Network Tools
+
+| Module | Category | Core technique |
+|---|---|---|
+| **Password / Wordlist Generator** | Utility / Offensive | Character-set brute-force + seed-phrase mutation (leet, caps, suffixes) |
+| **ARP Scanner** | Network / Recon | Layer-2 ARP broadcast → MAC/IP/vendor table |
+
+**Password / Wordlist Generator** — crunch/CeWL-inspired. Generate wordlists from a character set + min/max length (brute-force mode) or from a seed phrase with common mutations (leet-speak, capitalisation, number suffixes). Export to `.txt` for direct use in the Credential Tester or Hash Cracker.
+
+**ARP Scanner** — Scapy-inspired. Broadcast an ARP request on the local subnet and collect replies: IP, MAC address, and vendor name via OUI lookup. Teaches layer-2 topology. ⚠ Requires administrator/root privileges and the `scapy` dependency (C extension).
 
 ---
 
