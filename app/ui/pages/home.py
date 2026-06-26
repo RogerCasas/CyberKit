@@ -100,6 +100,22 @@ MODULE_CARDS = [
         "tag_color": "#22c55e",
         "page": "whois_geo",
     },
+    {
+        "icon": "📡",
+        "title": "HTTP Builder",
+        "desc": "Craft custom HTTP requests (method, headers, body) and inspect the full raw response: status, headers, body.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "http_builder",
+    },
+    {
+        "icon": "💉",
+        "title": "SQLi Tester",
+        "desc": "Detect SQL injection in GET/POST parameters via error-based and boolean-based techniques. Detection only.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "sqli_tester",
+    },
 ]
 
 

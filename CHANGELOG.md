@@ -4,6 +4,18 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-26 — v3.1 Web Attack Utilities
+
+- Added **HTTP Request Builder / Replay** module: craft custom HTTP requests (method, headers, body) and inspect the full raw response — status code with colour-coded badge, response headers, and response body. Supports GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, follow-redirects toggle, and arbitrary request headers via a dynamic add/remove editor.
+- Added **SQL Injection Tester** module: inject payloads into GET and POST parameters to detect SQL injection via error-based signatures (MySQL, MSSQL, Oracle, PostgreSQL, SQLite) and boolean-based content-length divergence. Detection only — no data extraction. Includes a mandatory disclaimer banner reminding users to only test systems they own or have explicit permission to test.
+- Added `app/modules/http_builder.py`: shared HTTP engine backed by `requests`; returns a `RequestResult` dataclass, never raises exceptions — errors are surfaced in the `error` field.
+- Added `app/modules/sqli_tester.py`: SQLi detection engine with 4 error payloads (single quote, double quote, backslash, quote+paren) and 5 boolean probe sets (AND string, AND numeric, OR string, AND bracket, OR numeric); each probe iterates with early exit on first detection.
+- Added 18 automated engine tests: 3 for the HTTP engine and 15 for the SQLi engine — covering all supported DB error patterns, all boolean probe strategies, `_inject` GET/POST mechanics, `_parse_params`, and `scan()` integration.
+- Updated sidebar navigation (HTTP Builder, SQLi Tester items), home-page module cards (two new Active cards), `app_window.py` page registration, and version label to `v3.1.0`.
+- Marked v3.1 complete in `roadmap.md`.
+
+---
+
 ## 2026-06-26 — v3.0 Passive Recon Expansion
 
 - Added **SSL/TLS Certificate Analyser** module: connects to any host over TLS, retrieves the certificate, and displays CN, issuer, subject alternative names, serial number, signature algorithm, and validity dates. Status badges flag expired (red), near-expiry < 30 days (amber), and self-signed (amber) certificates; valid certs from a trusted CA show green. Scrollable cert-details panel handles long SAN lists.

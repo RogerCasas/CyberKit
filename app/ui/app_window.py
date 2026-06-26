@@ -16,6 +16,8 @@ from app.ui.pages.hash_tool import HashToolPage
 from app.ui.pages.tech_fingerprinter import TechFingerprinterPage
 from app.ui.pages.ssl_analyser import SslAnalyserPage
 from app.ui.pages.whois_geo import WhoisGeoPage
+from app.ui.pages.http_builder import HttpBuilderPage
+from app.ui.pages.sqli_tester import SqliTesterPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -72,6 +74,8 @@ class AppWindow(ctk.CTk):
         self._pages["tech_fingerprinter"]  = TechFingerprinterPage(self._content)
         self._pages["ssl_analyser"]        = SslAnalyserPage(self._content)
         self._pages["whois_geo"]           = WhoisGeoPage(self._content)
+        self._pages["http_builder"]        = HttpBuilderPage(self._content)
+        self._pages["sqli_tester"]         = SqliTesterPage(self._content)
 
         for page in self._pages.values():
             page.grid(row=0, column=0, sticky="nsew")
