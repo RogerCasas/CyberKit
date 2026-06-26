@@ -98,7 +98,7 @@ class HashToolPage(ctk.CTkFrame):
 
         self._identify_frame.grid(row=2, column=0, sticky="nsew", padx=30, pady=(14, 30))
         self._crack_frame.grid(row=2, column=0, sticky="nsew", padx=30, pady=(14, 30))
-        self._crack_frame.grid_remove()
+        self._identify_frame.tkraise()
 
     def _build_identify_tab(self) -> ctk.CTkFrame:
         frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -329,15 +329,13 @@ class HashToolPage(ctk.CTkFrame):
 
     def _switch_tab(self, tab: str):
         if tab == "identify":
-            self._tab_id_btn.configure(fg_color=ACCENT_CYAN, text_color="#0f1117")
-            self._tab_crack_btn.configure(fg_color=BG_CARD, text_color=TEXT_MUTED)
-            self._identify_frame.grid()
-            self._crack_frame.grid_remove()
+            self._identify_frame.tkraise()
+            self._tab_id_btn.configure(fg_color=ACCENT_CYAN, hover_color="#00aacc", text_color="#0f1117")
+            self._tab_crack_btn.configure(fg_color=BG_CARD, hover_color=BG_INPUT, text_color=TEXT_MUTED)
         else:
-            self._tab_crack_btn.configure(fg_color=ACCENT_CYAN, text_color="#0f1117")
-            self._tab_id_btn.configure(fg_color=BG_CARD, text_color=TEXT_MUTED)
-            self._crack_frame.grid()
-            self._identify_frame.grid_remove()
+            self._crack_frame.tkraise()
+            self._tab_crack_btn.configure(fg_color=ACCENT_CYAN, hover_color="#00aacc", text_color="#0f1117")
+            self._tab_id_btn.configure(fg_color=BG_CARD, hover_color=BG_INPUT, text_color=TEXT_MUTED)
 
     # ── Identify ──────────────────────────────────────────────────────────────
 

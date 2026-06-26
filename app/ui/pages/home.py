@@ -95,7 +95,7 @@ class HomePage(ctk.CTkFrame):
 
     def _build(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
 
         # ── Hero section ──────────────────────────────────────────────────────
         hero = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
@@ -154,8 +154,12 @@ class HomePage(ctk.CTkFrame):
         ).grid(row=2, column=0, sticky="w", padx=40, pady=(32, 10))
 
         # ── Module card grid ──────────────────────────────────────────────────
-        card_container = ctk.CTkFrame(self, fg_color="transparent")
-        card_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=(0, 40))
+        card_container = ctk.CTkScrollableFrame(
+            self, fg_color="transparent", corner_radius=0,
+            scrollbar_button_color=BORDER_COLOR,
+            scrollbar_button_hover_color=TEXT_DIM,
+        )
+        card_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=(0, 20))
         card_container.grid_columnconfigure((0, 1), weight=1)
 
         for i, mod in enumerate(MODULE_CARDS):
