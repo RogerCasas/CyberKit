@@ -32,12 +32,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v1.2 — Auth & DNS Recon
+## v1.2 — Auth & DNS Recon ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **Credential Tester** | Auth / Brute-force | HTTP form-based + Basic auth dictionary attack |
-| **DNS & Subdomain Enumerator** | Recon / OSINT | DNS record lookup + wordlist-based subdomain brute-force |
+| **Credential Tester** | Auth / Brute-force | HTTP form-based + Basic auth dictionary attack | ✅ Done |
+| **DNS & Subdomain Enumerator** | Recon / OSINT | DNS record lookup + wordlist-based subdomain brute-force | ✅ Done |
 
 **Credential Tester** — hydra-inspired. Two tabs: (1) HTTP — supply a login URL, username list, and password list; tries combinations and reports successes; (2) SSH — supply a host, username list, and password list; uses Paramiko to test SSH login. Teaches HTTP auth flows and the SSH protocol without enabling mass attacks (rate-limiting built in).
 

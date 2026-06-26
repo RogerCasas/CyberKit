@@ -9,6 +9,8 @@ from app.ui.pages.home import HomePage
 from app.ui.pages.fuzzer import FuzzerPage
 from app.ui.pages.port_scanner import PortScannerPage
 from app.ui.pages.header_analyser import HeaderAnalyserPage
+from app.ui.pages.credential_tester import CredentialTesterPage
+from app.ui.pages.dns_enumerator import DNSEnumeratorPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -54,10 +56,12 @@ class AppWindow(ctk.CTk):
 
     def _register_pages(self):
         """Instantiate all pages and stack them in the content area."""
-        self._pages["home"]             = HomePage(self._content, navigate_callback=self.show_page)
-        self._pages["fuzzer"]           = FuzzerPage(self._content)
-        self._pages["port_scanner"]     = PortScannerPage(self._content)
-        self._pages["header_analyser"]  = HeaderAnalyserPage(self._content)
+        self._pages["home"]                = HomePage(self._content, navigate_callback=self.show_page)
+        self._pages["fuzzer"]              = FuzzerPage(self._content)
+        self._pages["port_scanner"]        = PortScannerPage(self._content)
+        self._pages["header_analyser"]     = HeaderAnalyserPage(self._content)
+        self._pages["credential_tester"]   = CredentialTesterPage(self._content)
+        self._pages["dns_enumerator"]      = DNSEnumeratorPage(self._content)
 
         for page in self._pages.values():
             page.grid(row=0, column=0, sticky="nsew")

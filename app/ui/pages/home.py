@@ -39,10 +39,10 @@ MODULE_CARDS = [
     {
         "icon": "🔑",
         "title": "Credential Tester",
-        "desc": "Test common default credentials against login endpoints. Supports HTTP Basic and form-based auth.",
-        "tag": "Coming Soon",
-        "tag_color": TEXT_MUTED,
-        "page": None,
+        "desc": "Test credentials against HTTP Basic, form-based, and SSH login endpoints with rate-limiting and live results.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "credential_tester",
     },
     {
         "icon": "🛡",
@@ -51,6 +51,14 @@ MODULE_CARDS = [
         "tag": "Active",
         "tag_color": "#22c55e",
         "page": "header_analyser",
+    },
+    {
+        "icon": "🌐",
+        "title": "DNS Enumerator",
+        "desc": "Resolve A, AAAA, MX, NS, TXT records and brute-force subdomains from a built-in or custom wordlist.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "dns_enumerator",
     },
 ]
 
