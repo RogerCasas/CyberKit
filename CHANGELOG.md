@@ -4,6 +4,21 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-26 — v3.0 Passive Recon Expansion
+
+- Added **SSL/TLS Certificate Analyser** module: connects to any host over TLS, retrieves the certificate, and displays CN, issuer, subject alternative names, serial number, signature algorithm, and validity dates. Status badges flag expired (red), near-expiry < 30 days (amber), and self-signed (amber) certificates; valid certs from a trusted CA show green. Scrollable cert-details panel handles long SAN lists.
+- Added **WHOIS & Geolocation** module: two-tab page combining domain WHOIS lookup (registrar, creation/expiry dates, registrant org, name servers via `python-whois`) and IP geolocation (country, region, city, ISP, org, ASN via ip-api.com). Domain names are resolved to IP automatically for the geo tab. URL normalisation strips `https://` and trailing paths.
+- Added `app/modules/ssl_analyser.py`: SSL engine using `ssl.CERT_NONE` context + `cryptography` library for DER certificate parsing; exports `_compute_status` and `_extract_sans` helpers for unit testing.
+- Added `app/modules/whois_engine.py`: WHOIS engine with type-safe normalisation helpers that handle `None`, `str`, and `list[datetime]` field variants returned by `python-whois`.
+- Added `app/modules/geo_engine.py`: geolocation engine backed by the ip-api.com free-tier JSON API; resolves domain names to IP before querying.
+- Added 13 automated engine tests: 8 for SSL (`_compute_status` flags, SAN extraction, self-signed detection) and 5 for WHOIS/geo (mocked field parsing, error handling).
+- Fixed SAN extraction bug: `get_values_for_type(x509.DNSName)` returns plain strings, not `DNSName` objects — removed erroneous `.value` attribute access.
+- Added `cryptography>=3.3` and `python-whois>=0.9.0` to `requirements.txt`.
+- Updated sidebar navigation (SSL Analyser, WHOIS & Geo items), home-page module cards (two new Active cards), `app_window.py` page registration, and version label to `v3.0.0`.
+- Marked v3.0 complete in `roadmap.md`; committed spec files and fully-checked validation checklist.
+
+---
+
 ## 2026-06-26 — Roadmap Replanning
 
 - Restructured `roadmap.md`: promoted all six v2.x future candidates into three scheduled milestones — v3.0 (SSL/TLS Certificate Analyser + WHOIS & IP Geolocation), v3.1 (HTTP Request Builder + SQL Injection Tester), and v3.2 (Password/Wordlist Generator + ARP Scanner). Each milestone now has a full description table and module summaries.

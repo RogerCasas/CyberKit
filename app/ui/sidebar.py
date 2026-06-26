@@ -27,6 +27,8 @@ NAV_ITEMS = [
     ("Encoder/Decoder",  "🔤", "encoder_decoder"),
     ("Hash Tool",        "#",  "hash_tool"),
     ("Tech Fingerprint", "🖥", "tech_fingerprinter"),
+    ("SSL Analyser",     "🔒", "ssl_analyser"),
+    ("WHOIS & Geo",      "🌍", "whois_geo"),
 ]
 
 
@@ -140,7 +142,7 @@ class Sidebar(ctk.CTkFrame):
 
         # ── Version label ─────────────────────────────────────────────────────
         self._version_label = ctk.CTkLabel(
-            self, text="v2.0.0",
+            self, text="v3.0.0",
             font=ctk.CTkFont(family="Segoe UI", size=10),
             text_color=TEXT_MUTED,
         )
@@ -178,7 +180,7 @@ class Sidebar(ctk.CTkFrame):
                     self._label_widgets[key].configure(text=nav_label)
             self._logo_label.configure(text="⚡ CyberKit")
             self._section_label.configure(text="MODULES")
-            self._version_label.configure(text="v2.0.0")
+            self._version_label.configure(text="v3.0.0")
             self.configure(width=SIDEBAR_W_EXPANDED)
             self._toggle_btn.configure(text="◀")
         else:
