@@ -60,6 +60,30 @@ MODULE_CARDS = [
         "tag_color": "#22c55e",
         "page": "dns_enumerator",
     },
+    {
+        "icon": "🔤",
+        "title": "Encoder / Decoder",
+        "desc": "Bidirectional transforms: URL, Base64, HTML entities, hex, ROT-13, and JWT inspection.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "encoder_decoder",
+    },
+    {
+        "icon": "#",
+        "title": "Hash Tool",
+        "desc": "Identify hash algorithm by pattern (MD5, SHA-1, SHA-256, bcrypt…) and run a dictionary attack.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "hash_tool",
+    },
+    {
+        "icon": "🖥",
+        "title": "Tech Fingerprinter",
+        "desc": "Detect CMS, server software, frameworks, and CDNs from HTTP response headers and body signatures.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "tech_fingerprinter",
+    },
 ]
 
 
