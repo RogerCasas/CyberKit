@@ -116,6 +116,22 @@ MODULE_CARDS = [
         "tag_color": "#22c55e",
         "page": "sqli_tester",
     },
+    {
+        "icon": "📝",
+        "title": "Wordlist Generator",
+        "desc": "Generate custom wordlists via charset brute-force or seed-phrase mutation (leet, caps, suffixes). Export to .txt and feed directly into Credential Tester.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "wordlist_generator",
+    },
+    {
+        "icon": "📡",
+        "title": "ARP Scanner",
+        "desc": "Discover live hosts on a local subnet via layer-2 ARP broadcast. Shows IP, MAC, vendor (OUI lookup), and hostname. Requires administrator privileges.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "arp_scanner",
+    },
 ]
 
 

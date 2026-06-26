@@ -18,6 +18,8 @@ from app.ui.pages.ssl_analyser import SslAnalyserPage
 from app.ui.pages.whois_geo import WhoisGeoPage
 from app.ui.pages.http_builder import HttpBuilderPage
 from app.ui.pages.sqli_tester import SqliTesterPage
+from app.ui.pages.wordlist_generator import WordlistGeneratorPage
+from app.ui.pages.arp_scanner import ARPScannerPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -76,6 +78,8 @@ class AppWindow(ctk.CTk):
         self._pages["whois_geo"]           = WhoisGeoPage(self._content)
         self._pages["http_builder"]        = HttpBuilderPage(self._content)
         self._pages["sqli_tester"]         = SqliTesterPage(self._content)
+        self._pages["wordlist_generator"]  = WordlistGeneratorPage(self._content, navigate_callback=self.show_page)
+        self._pages["arp_scanner"]         = ARPScannerPage(self._content)
 
         for page in self._pages.values():
             page.grid(row=0, column=0, sticky="nsew")

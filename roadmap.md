@@ -87,12 +87,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v3.2 — Password & Network Tools
+## v3.2 — Password & Network Tools ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **Password / Wordlist Generator** | Utility / Offensive | Character-set brute-force + seed-phrase mutation (leet, caps, suffixes) |
-| **ARP Scanner** | Network / Recon | Layer-2 ARP broadcast → MAC/IP/vendor table |
+| **Password / Wordlist Generator** | Utility / Offensive | Character-set brute-force + seed-phrase mutation (leet, caps, suffixes) | ✅ Done |
+| **ARP Scanner** | Network / Recon | Layer-2 ARP broadcast → MAC/IP/vendor table | ✅ Done |
 
 **Password / Wordlist Generator** — crunch/CeWL-inspired. Generate wordlists from a character set + min/max length (brute-force mode) or from a seed phrase with common mutations (leet-speak, capitalisation, number suffixes). Export to `.txt` for direct use in the Credential Tester or Hash Cracker.
 

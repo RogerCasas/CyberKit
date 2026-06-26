@@ -4,6 +4,20 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-26 — v3.2 Password & Network Tools
+
+- Added **Password / Wordlist Generator** module: two-tab interface for charset brute-force (itertools.product, lowercase/uppercase/digits/symbols, min/max length) and seed-phrase mutation (leet-speak, case variants, numeric suffixes 1–99, custom prefix/suffix). Both tabs show a live 20-entry preview updating in real time. Generation capped at 1,000,000 entries with warning. Export to `.txt` via background thread with progress label. "Send to Credential Tester" buttons wire the exported list directly into the Credential Tester (username or password list) without navigating away.
+- Added **ARP Scanner** module: broadcasts ARP requests on a user-supplied subnet (or auto-detected CIDR), resolves vendor from a bundled OUI table, performs best-effort reverse-DNS hostname lookup. Live Treeview (IP, MAC, Vendor, Hostname), auto-scroll, CSV/TXT export. Privilege check on scan start — shows a clear error if not running as administrator instead of crashing. Admin warning banner always visible above the controls.
+- Added `app/modules/wordlist_generator.py` — `BruteforceGenerator`, `MutationGenerator`, `generate_to_file`.
+- Added `app/modules/arp_scanner.py` — `ARPScanner`, `check_privileges`, `auto_detect_subnet`.
+- Added `app/data/oui_table.py` — bundled OUI vendor lookup table with `lookup_vendor()`.
+- Added `scapy>=2.5.0` to `requirements.txt` (requires administrator/root at runtime).
+- Updated sidebar with Wordlist Gen and ARP Scanner nav items; bumped version label to v3.2.0.
+- Promoted Wordlist Generator and ARP Scanner home-page cards to Active.
+- Marked v3.2 ✅ Complete in roadmap.md.
+
+---
+
 ## 2026-06-26 — v3.1 Web Attack Utilities
 
 - Added **HTTP Request Builder / Replay** module: craft custom HTTP requests (method, headers, body) and inspect the full raw response — status code with colour-coded badge, response headers, and response body. Supports GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, follow-redirects toggle, and arbitrary request headers via a dynamic add/remove editor.
