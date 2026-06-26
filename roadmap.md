@@ -45,13 +45,13 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v2.0 — Analysis & CTF Utilities
+## v2.0 — Analysis & CTF Utilities ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **Tech Fingerprinter** | Web / Recon | HTTP headers, HTML meta, cookie names → CMS / framework / server detection |
-| **Hash Identifier & Cracker** | Cryptanalysis | Pattern-match hash type; dictionary attack via hashlib |
-| **Encoder / Decoder** | Utility / CTF | URL, Base64, HTML entity, hex, rot13 — bidirectional |
+| **Tech Fingerprinter** | Web / Recon | HTTP headers, HTML meta, cookie names → CMS / framework / server detection | ✅ Done |
+| **Hash Identifier & Cracker** | Cryptanalysis | Pattern-match hash type; dictionary attack via hashlib | ✅ Done |
+| **Encoder / Decoder** | Utility / CTF | URL, Base64, HTML entity, hex, rot13 — bidirectional | ✅ Done |
 
 **Tech Fingerprinter** — WhatWeb-inspired. Detects CMS (WordPress, Drupal, Joomla), server software (Apache, Nginx, IIS), frameworks (Laravel, Django, Rails, Express), and security products from response signatures.
 

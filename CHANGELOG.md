@@ -4,6 +4,19 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-26 — v2.0 Analysis & CTF Utilities
+
+- Added **Encoder / Decoder** module: bidirectional transforms for URL encoding, Base64, Base64 URL-safe, HTML entities, hex, and ROT-13; JWT Inspect mode decodes the header and payload of a JWT without verifying the signature. All operations use stdlib only (`urllib.parse`, `base64`, `html`, `codecs`, `hashlib`). 14 automated engine tests.
+- Added **Hash Tool** module: Identify tab pattern-matches a hash against MD5/NTLM/LM, SHA-1/MySQL4, SHA-256, SHA-512, MySQL5, and bcrypt by length and charset; Crack tab runs a dictionary attack via `hashlib` against MD5, SHA-1, SHA-256, or SHA-512 using the bundled wordlist (top-200 rockyou subset) or a custom file, with live progress bar and Stop support. 11 automated engine tests.
+- Added **Tech Fingerprinter** module: issues a single HTTP GET and matches response headers, HTML body, cookie names, and `<meta>` tags against 37 signatures across 7 categories (CMS, Server, Language/Runtime, Framework, Frontend Library, CDN/Security, Cloud Storage). Results shown in a live Treeview; TXT export supported.
+- Added `app/data/wordlists.py` `CRACK_WORDLIST` (236-entry rockyou top-200 subset) for the Hash Tool cracker.
+- Added spec files for v2.0 (`specs/2026-06-26-v2.0-analysis-ctf/`).
+- Fixed tab-button flickering on the Hash Tool page: replaced `grid_remove()`/`grid()` with `tkraise()` (same pattern as Credential Tester and DNS Enumerator).
+- Wrapped the home-page module grid in a `CTkScrollableFrame` so all module cards remain accessible at any window size.
+- Updated sidebar navigation, home-page module cards, and `roadmap.md` for v2.0; bumped version label to v2.0.0.
+
+---
+
 ## 2026-06-26
 
 - Expanded `SUBDOMAIN_WORDLIST` from 289 to 524 entries (521 unique) to satisfy the ≥ 500 spec requirement; new entries cover infrastructure, mail/DNS servers, CDN/media, observability tools, auth/identity, databases, CI/CD tooling, analytics, and miscellaneous common subdomains.

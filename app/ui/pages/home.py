@@ -60,6 +60,30 @@ MODULE_CARDS = [
         "tag_color": "#22c55e",
         "page": "dns_enumerator",
     },
+    {
+        "icon": "🔤",
+        "title": "Encoder / Decoder",
+        "desc": "Bidirectional transforms: URL, Base64, HTML entities, hex, ROT-13, and JWT inspection.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "encoder_decoder",
+    },
+    {
+        "icon": "#",
+        "title": "Hash Tool",
+        "desc": "Identify hash algorithm by pattern (MD5, SHA-1, SHA-256, bcrypt…) and run a dictionary attack.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "hash_tool",
+    },
+    {
+        "icon": "🖥",
+        "title": "Tech Fingerprinter",
+        "desc": "Detect CMS, server software, frameworks, and CDNs from HTTP response headers and body signatures.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "tech_fingerprinter",
+    },
 ]
 
 
@@ -71,7 +95,7 @@ class HomePage(ctk.CTkFrame):
 
     def _build(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
 
         # ── Hero section ──────────────────────────────────────────────────────
         hero = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
@@ -130,8 +154,12 @@ class HomePage(ctk.CTkFrame):
         ).grid(row=2, column=0, sticky="w", padx=40, pady=(32, 10))
 
         # ── Module card grid ──────────────────────────────────────────────────
-        card_container = ctk.CTkFrame(self, fg_color="transparent")
-        card_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=(0, 40))
+        card_container = ctk.CTkScrollableFrame(
+            self, fg_color="transparent", corner_radius=0,
+            scrollbar_button_color=BORDER_COLOR,
+            scrollbar_button_hover_color=TEXT_DIM,
+        )
+        card_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=(0, 20))
         card_container.grid_columnconfigure((0, 1), weight=1)
 
         for i, mod in enumerate(MODULE_CARDS):

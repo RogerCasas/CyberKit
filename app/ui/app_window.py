@@ -11,6 +11,9 @@ from app.ui.pages.port_scanner import PortScannerPage
 from app.ui.pages.header_analyser import HeaderAnalyserPage
 from app.ui.pages.credential_tester import CredentialTesterPage
 from app.ui.pages.dns_enumerator import DNSEnumeratorPage
+from app.ui.pages.encoder_decoder import EncoderDecoderPage
+from app.ui.pages.hash_tool import HashToolPage
+from app.ui.pages.tech_fingerprinter import TechFingerprinterPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -62,6 +65,9 @@ class AppWindow(ctk.CTk):
         self._pages["header_analyser"]     = HeaderAnalyserPage(self._content)
         self._pages["credential_tester"]   = CredentialTesterPage(self._content)
         self._pages["dns_enumerator"]      = DNSEnumeratorPage(self._content)
+        self._pages["encoder_decoder"]     = EncoderDecoderPage(self._content)
+        self._pages["hash_tool"]           = HashToolPage(self._content)
+        self._pages["tech_fingerprinter"]  = TechFingerprinterPage(self._content)
 
         for page in self._pages.values():
             page.grid(row=0, column=0, sticky="nsew")

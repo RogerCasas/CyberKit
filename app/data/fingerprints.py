@@ -1,0 +1,163 @@
+"""
+CyberKit — Technology fingerprint signature database.
+
+Each Fingerprint is matched against:
+  headers  — {lowercase_header_name: substring_to_find_in_value}
+  html     — list of substrings searched in the response body
+  cookies  — list of substrings matched against cookie names
+  meta     — list of substrings matched against <meta> tag content attributes
+"""
+
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Fingerprint:
+    name:     str
+    category: str
+    headers:  dict = field(default_factory=dict)
+    html:     list = field(default_factory=list)
+    cookies:  list = field(default_factory=list)
+    meta:     list = field(default_factory=list)
+
+
+FINGERPRINTS: list = [
+    # ── CMS ───────────────────────────────────────────────────────────────────
+    Fingerprint("WordPress", "CMS",
+        html=["wp-content/", "wp-includes/", "/wp-json/"],
+        meta=["WordPress"],
+        cookies=["wordpress_", "wp-settings-"],
+    ),
+    Fingerprint("Drupal", "CMS",
+        headers={"x-generator": "Drupal"},
+        html=["Drupal.settings", "/sites/default/files/", "drupal.js"],
+        cookies=["SESS"],
+    ),
+    Fingerprint("Joomla", "CMS",
+        html=["/media/jui/", "Joomla!", "/components/com_"],
+        cookies=["joomla_"],
+    ),
+    Fingerprint("Magento", "CMS",
+        html=["Mage.Cookies", "/skin/frontend/", "var BLANK_URL"],
+        cookies=["frontend"],
+    ),
+    Fingerprint("Ghost", "CMS",
+        html=["ghost/", "content=\"Ghost"],
+        meta=["Ghost"],
+    ),
+    Fingerprint("Shopify", "CMS",
+        html=["cdn.shopify.com", "Shopify.theme"],
+        cookies=["_shopify_"],
+    ),
+    Fingerprint("Wix", "CMS",
+        html=["static.wixstatic.com", "X-Wix-"],
+        headers={"x-wix-renderer-server": ""},
+    ),
+    Fingerprint("Squarespace", "CMS",
+        html=["squarespace.com", "squarespace-cdn.com"],
+    ),
+    Fingerprint("PrestaShop", "CMS",
+        html=["prestashop", "/themes/classic/"],
+        cookies=["PrestaShop-"],
+    ),
+    # ── Server software ───────────────────────────────────────────────────────
+    Fingerprint("Apache", "Server",
+        headers={"server": "Apache"},
+    ),
+    Fingerprint("Nginx", "Server",
+        headers={"server": "nginx"},
+    ),
+    Fingerprint("Microsoft IIS", "Server",
+        headers={"server": "Microsoft-IIS"},
+    ),
+    Fingerprint("LiteSpeed", "Server",
+        headers={"server": "LiteSpeed"},
+    ),
+    Fingerprint("Caddy", "Server",
+        headers={"server": "Caddy"},
+    ),
+    Fingerprint("OpenResty", "Server",
+        headers={"server": "openresty"},
+    ),
+    # ── Language / Runtime ────────────────────────────────────────────────────
+    Fingerprint("PHP", "Language / Runtime",
+        headers={"x-powered-by": "PHP"},
+        cookies=["PHPSESSID"],
+    ),
+    Fingerprint("ASP.NET", "Language / Runtime",
+        headers={"x-powered-by": "ASP.NET", "x-aspnet-version": ""},
+        cookies=["ASP.NET_SessionId", ".ASPXAUTH"],
+    ),
+    Fingerprint("Java / Tomcat", "Language / Runtime",
+        headers={"server": "Apache-Coyote"},
+        cookies=["JSESSIONID"],
+    ),
+    Fingerprint("Python / Gunicorn", "Language / Runtime",
+        headers={"server": "gunicorn"},
+    ),
+    Fingerprint("Node.js / Express", "Language / Runtime",
+        headers={"x-powered-by": "Express"},
+        cookies=["connect.sid"],
+    ),
+    # ── Framework ─────────────────────────────────────────────────────────────
+    Fingerprint("Laravel", "Framework",
+        html=["laravel_session"],
+        cookies=["laravel_session", "XSRF-TOKEN"],
+    ),
+    Fingerprint("Django", "Framework",
+        html=["csrfmiddlewaretoken"],
+        cookies=["csrftoken", "sessionid"],
+    ),
+    Fingerprint("Flask / Werkzeug", "Framework",
+        headers={"server": "Werkzeug"},
+    ),
+    Fingerprint("Ruby on Rails", "Framework",
+        html=["data-remote=\"true\"", "rails.js"],
+        cookies=["_session_id"],
+    ),
+    Fingerprint("Spring", "Framework",
+        headers={"x-application-context": ""},
+        html=["org.springframework"],
+    ),
+    Fingerprint("Next.js", "Framework",
+        html=["__NEXT_DATA__", "_next/static/"],
+        headers={"x-powered-by": "Next.js"},
+    ),
+    Fingerprint("Nuxt.js", "Framework",
+        html=["__NUXT__", "_nuxt/"],
+    ),
+    # ── Frontend ──────────────────────────────────────────────────────────────
+    Fingerprint("React", "Frontend Library",
+        html=["react.min.js", "react-dom", "data-reactroot", "__REACT_DEVTOOLS"],
+    ),
+    Fingerprint("Angular", "Frontend Library",
+        html=["ng-version", "angular.min.js", "ng-app="],
+    ),
+    Fingerprint("Vue.js", "Frontend Library",
+        html=["vue.min.js", "__vue__", "v-app"],
+    ),
+    Fingerprint("jQuery", "Frontend Library",
+        html=["jquery.min.js", "jquery.js", "/jquery-"],
+    ),
+    Fingerprint("Bootstrap", "Frontend Library",
+        html=["bootstrap.min.css", "bootstrap.css"],
+    ),
+    # ── CDN / Security / Cloud ─────────────────────────────────────────────────
+    Fingerprint("Cloudflare", "CDN / Security",
+        headers={"server": "cloudflare", "cf-ray": ""},
+        cookies=["__cfduid", "__cf_bm"],
+    ),
+    Fingerprint("Akamai", "CDN / Security",
+        headers={"x-akamai-transformed": "", "x-check-cacheable": ""},
+    ),
+    Fingerprint("Fastly", "CDN / Security",
+        headers={"x-served-by": "cache-", "fastly-restarts": ""},
+    ),
+    Fingerprint("Imperva / Incapsula", "CDN / Security",
+        headers={"x-iinfo": ""},
+        cookies=["incap_ses_", "visid_incap_"],
+    ),
+    Fingerprint("Amazon S3", "Cloud Storage",
+        headers={"server": "AmazonS3", "x-amz-request-id": ""},
+    ),
+]
