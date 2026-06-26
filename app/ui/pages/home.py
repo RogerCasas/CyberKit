@@ -84,6 +84,22 @@ MODULE_CARDS = [
         "tag_color": "#22c55e",
         "page": "tech_fingerprinter",
     },
+    {
+        "icon": "🔒",
+        "title": "SSL Analyser",
+        "desc": "Inspect TLS certificates: expiry, issuer, SANs, serial, and signature algorithm. Flags expired, near-expiry, and self-signed certs.",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "ssl_analyser",
+    },
+    {
+        "icon": "🌍",
+        "title": "WHOIS & Geo",
+        "desc": "Look up domain registration data (registrar, dates, name servers) and IP geolocation (country, city, ASN).",
+        "tag": "Active",
+        "tag_color": "#22c55e",
+        "page": "whois_geo",
+    },
 ]
 
 

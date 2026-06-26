@@ -14,6 +14,8 @@ from app.ui.pages.dns_enumerator import DNSEnumeratorPage
 from app.ui.pages.encoder_decoder import EncoderDecoderPage
 from app.ui.pages.hash_tool import HashToolPage
 from app.ui.pages.tech_fingerprinter import TechFingerprinterPage
+from app.ui.pages.ssl_analyser import SslAnalyserPage
+from app.ui.pages.whois_geo import WhoisGeoPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -68,6 +70,8 @@ class AppWindow(ctk.CTk):
         self._pages["encoder_decoder"]     = EncoderDecoderPage(self._content)
         self._pages["hash_tool"]           = HashToolPage(self._content)
         self._pages["tech_fingerprinter"]  = TechFingerprinterPage(self._content)
+        self._pages["ssl_analyser"]        = SslAnalyserPage(self._content)
+        self._pages["whois_geo"]           = WhoisGeoPage(self._content)
 
         for page in self._pages.values():
             page.grid(row=0, column=0, sticky="nsew")

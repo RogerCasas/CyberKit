@@ -61,12 +61,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v3.0 — Passive Recon Expansion
+## v3.0 — Passive Recon Expansion ✅ Complete
 
 | Module | Category | Core technique |
 |---|---|---|
-| **SSL/TLS Certificate Analyser** | Web / Recon | TLS handshake → certificate chain inspection, expiry, SANs, cipher suites |
-| **WHOIS & IP Geolocation** | Recon / OSINT | Domain WHOIS registration data + IP geolocation via public APIs |
+| **SSL/TLS Certificate Analyser** | Web / Recon | TLS handshake → certificate chain inspection, expiry, SANs, cipher suites | ✅ Done |
+| **WHOIS & IP Geolocation** | Recon / OSINT | Domain WHOIS registration data + IP geolocation via public APIs | ✅ Done |
 
 **SSL/TLS Certificate Analyser** — SSLyze-inspired. Connect to a host over TLS, retrieve the certificate chain, and display expiry date, issuer, subject alternative names, and supported cipher suites. Flags expired, near-expiry (< 30 days), and self-signed certificates.
 
