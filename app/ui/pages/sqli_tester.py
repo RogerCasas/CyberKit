@@ -66,12 +66,8 @@ class SqliTesterPage(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Scrollable container — all content lives here so the page scrolls
-        # when the payloads panel is expanded or the window is short
-        self._scroll = ctk.CTkScrollableFrame(
+        self._scroll = ctk.CTkFrame(
             self, fg_color=BG_MAIN, corner_radius=0,
-            scrollbar_button_color=BORDER_COLOR,
-            scrollbar_button_hover_color=TEXT_DIM,
         )
         self._scroll.grid(row=0, column=0, sticky="nsew")
         self._scroll.grid_columnconfigure(0, weight=1)
