@@ -3,6 +3,7 @@ CyberKit — Collapsible Sidebar (instant toggle, no animation)
 """
 
 import customtkinter as ctk
+from app.ui.scrollable import AutoHideScrollFrame
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 BG_SIDEBAR      = "#0d1117"
@@ -67,10 +68,10 @@ class Sidebar(ctk.CTkFrame):
     # ── Build ─────────────────────────────────────────────────────────────────
 
     def _build(self):
-        self.grid_rowconfigure(99, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(3, weight=1)  # nav scroll area expands
 
-        # ── Toggle row (always fully visible) ────────────────────────────────
+        # ── Toggle row ────────────────────────────────────────────────────────
         toggle_row = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
         toggle_row.grid(row=0, column=0, sticky="ew", padx=0, pady=(8, 0))
         toggle_row.grid_columnconfigure(0, weight=1)
@@ -84,17 +85,12 @@ class Sidebar(ctk.CTkFrame):
         )
         self._logo_label.grid(row=0, column=0, sticky="w", padx=(14, 0))
 
-        # Toggle button is in column=1 and is NEVER removed from grid
         self._toggle_btn = ctk.CTkButton(
             toggle_row,
             text="◀",
-            width=30,
-            height=30,
-            corner_radius=6,
-            fg_color="transparent",
-            hover_color=BG_ITEM_HOVER,
-            text_color=TEXT_MUTED,
-            font=ctk.CTkFont(size=11),
+            width=30, height=30, corner_radius=6,
+            fg_color="transparent", hover_color=BG_ITEM_HOVER,
+            text_color=TEXT_MUTED, font=ctk.CTkFont(size=11),
             command=self.toggle,
         )
         self._toggle_btn.grid(row=0, column=1, padx=(0, 8))
@@ -106,20 +102,22 @@ class Sidebar(ctk.CTkFrame):
 
         # ── Section label ─────────────────────────────────────────────────────
         self._section_label = ctk.CTkLabel(
-            self,
-            text="MODULES",
+            self, text="MODULES",
             font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
-            text_color=TEXT_MUTED,
-            anchor="w",
+            text_color=TEXT_MUTED, anchor="w",
         )
-        self._section_label.grid(row=2, column=0, sticky="w", padx=16,
-                                  pady=(2, 4))
+        self._section_label.grid(row=2, column=0, sticky="w", padx=16, pady=(2, 4))
 
-        # ── Nav items ─────────────────────────────────────────────────────────
+        # ── Scrollable nav area ───────────────────────────────────────────────
+        self._nav_scroll = AutoHideScrollFrame(self, fg_color=BG_SIDEBAR)
+        self._nav_scroll.grid(row=3, column=0, sticky="nsew")
+        nav = self._nav_scroll.inner
+        nav.grid_columnconfigure(0, weight=1)
+
         for idx, (label, icon, key) in enumerate(NAV_ITEMS):
-            frame = ctk.CTkFrame(self, fg_color="transparent",
+            frame = ctk.CTkFrame(nav, fg_color="transparent",
                                  corner_radius=8, cursor="hand2")
-            frame.grid(row=3 + idx, column=0, sticky="ew", padx=6, pady=2)
+            frame.grid(row=idx, column=0, sticky="ew", padx=6, pady=2)
             frame.grid_columnconfigure(1, weight=1)
 
             icon_lbl = ctk.CTkLabel(
@@ -150,7 +148,7 @@ class Sidebar(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=10),
             text_color=TEXT_MUTED,
         )
-        self._version_label.grid(row=99, column=0, pady=(0, 12))
+        self._version_label.grid(row=4, column=0, pady=(4, 12))
 
         self._set_active("home")
 
@@ -185,6 +183,7 @@ class Sidebar(ctk.CTkFrame):
             self._logo_label.configure(text="⚡ CyberKit")
             self._section_label.configure(text="MODULES")
             self._version_label.configure(text="v3.2.0")
+            self._nav_scroll.configure(width=SIDEBAR_W_EXPANDED)
             self.configure(width=SIDEBAR_W_EXPANDED)
             self._toggle_btn.configure(text="◀")
         else:

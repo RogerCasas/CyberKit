@@ -4,6 +4,21 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-27 — v3.2 Polish: Scrolling, UI Fixes & Privacy
+
+- Replaced the page-level scroll implementation (`AutoHideScrollFrame`) with a `CTkScrollbar`-based design: the scrollbar now matches the rounded, minimalist style used by `CTkScrollableFrame` throughout the app.
+- Fixed mousewheel scrolling: replaced the broken canvas `<Enter>`/`<Leave>` approach with a single toplevel binding that checks cursor position — now works correctly over all child widgets including nav items and cards.
+- Fixed initial scrollbar visibility: `_sync` now defers via `after_idle` and manually triggers the yscrollcommand after setting the scroll region, so the scrollbar appears correctly on first render.
+- Fixed teardown crash (`TclError: invalid command name`) by overriding `_update_dimensions_event` in `AutoHideScrollFrame` to catch errors during window close.
+- Fixed home page module card hover/click not working when the cursor was over the title or tag badge — bindings are now applied recursively to all descendants.
+- Removed redundant `CTkScrollableFrame` wrappers from the home page card container and the SQL Injection Tester page — these conflicted with the outer `AutoHideScrollFrame` and produced a spurious scrollbar in the middle of the page.
+- Switched `theme_use("clam")` to apply once at startup so custom ttk colours (Treeview scrollbars in ARP, Port Scanner, SQLi, etc.) are honoured on Windows — the default Vista theme ignores colour overrides.
+- Wordlist Generator live preview upgraded from a fixed 20-entry grid to a scrollable `CTkScrollableFrame` containing up to 200 entries; the preview panel fills its column and the user scrolls within it rather than enlarging the window.
+- Removed the 1 000 000-entry generation cap from the wordlist generator engine.
+- Performed a privacy audit of the repository: no personal paths, IPs, or secrets found in tracked files. Git commit email changed to a GitHub noreply alias for future commits.
+
+---
+
 ## 2026-06-26 — v3.2 Password & Network Tools
 
 - Added **Password / Wordlist Generator** module: two-tab interface for charset brute-force (itertools.product, lowercase/uppercase/digits/symbols, min/max length) and seed-phrase mutation (leet-speak, case variants, numeric suffixes 1–99, custom prefix/suffix). Both tabs show a live 20-entry preview updating in real time. Generation capped at 1,000,000 entries with warning. Export to `.txt` via background thread with progress label. "Send to Credential Tester" buttons wire the exported list directly into the Credential Tester (username or password list) without navigating away.

@@ -17,7 +17,7 @@ import customtkinter as ctk
 
 from app.modules.wordlist_generator import (
     BruteforceGenerator, MutationGenerator,
-    generate_to_file, MAX_ENTRIES,
+    generate_to_file,
 )
 
 # ── Palette ───────────────────────────────────────────────────────────────────
@@ -157,6 +157,9 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         self._bf_digits = tk.BooleanVar(value=False)
         self._bf_syms   = tk.BooleanVar(value=False)
 
+        for var in (self._bf_lower, self._bf_upper, self._bf_digits, self._bf_syms):
+            var.trace_add("write", lambda *_: self._bf_update())
+
         for row, (label, var) in enumerate([
             ("Lowercase  a–z  (26 chars)", self._bf_lower),
             ("Uppercase  A–Z  (26 chars)", self._bf_upper),
@@ -169,7 +172,6 @@ class WordlistGeneratorPage(ctk.CTkFrame):
                 text_color=TEXT_MUTED,
                 fg_color=ACCENT_CYAN, hover_color="#00aacc",
                 checkmark_color="#0f1117",
-                command=self._bf_update,
             ).grid(row=row, column=0, sticky="w", padx=24, pady=3)
 
         ctk.CTkLabel(left, text="Length Range",
@@ -236,7 +238,7 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         self._build_send_buttons(left, row=11, tab="bf")
 
         # ── Right: preview ──────────────────────────────────────────────────
-        self._bf_preview = self._build_preview_panel(frame, col=1)
+        self._bf_preview, self._bf_preview_warn = self._build_preview_panel(frame, col=1)
 
         self._bf_update()
         return frame
@@ -280,6 +282,10 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         self._mut_title   = tk.BooleanVar(value=False)
         self._mut_suffixes = tk.BooleanVar(value=False)
 
+        for var in (self._mut_leet, self._mut_lower, self._mut_upper,
+                    self._mut_title, self._mut_suffixes):
+            var.trace_add("write", lambda *_: self._mut_update())
+
         for row, (label, var) in enumerate([
             ("Leet-speak  (a→@, e→3, i→1, o→0, s→$)", self._mut_leet),
             ("Lowercase",                               self._mut_lower),
@@ -293,7 +299,6 @@ class WordlistGeneratorPage(ctk.CTkFrame):
                 text_color=TEXT_MUTED,
                 fg_color=ACCENT_CYAN, hover_color="#00aacc",
                 checkmark_color="#0f1117",
-                command=self._mut_update,
             ).grid(row=row, column=0, sticky="w", padx=24, pady=3)
 
         ctk.CTkLabel(left, text="Custom Prefix / Suffix",
@@ -362,37 +367,68 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         self._build_send_buttons(left, row=14, tab="mut")
 
         # ── Right: preview ──────────────────────────────────────────────────
-        self._mut_preview = self._build_preview_panel(frame, col=1)
+        self._mut_preview, self._mut_preview_warn = self._build_preview_panel(frame, col=1)
 
         self._mut_update()
         return frame
 
     # ── Shared helpers ────────────────────────────────────────────────────────
 
-    def _build_preview_panel(self, parent, col: int) -> list:
-        """Build the live-preview panel. Returns list of entry-label widgets."""
+    # Preview grid dimensions
+    _PREV_COLS  = 4
+    _PREV_TOTAL = 200  # entries shown (user scrolls within the panel)
+
+    def _build_preview_panel(self, parent, col: int) -> tuple:
+        """
+        Build the live-preview panel.
+        Returns (list_of_entry_labels, warning_label).
+        Labels live inside a CTkScrollableFrame so the panel never grows the
+        window — the user scrolls within the preview area instead.
+        """
         panel = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=12,
                              border_width=1, border_color=BORDER_COLOR)
         panel.grid(row=0, column=col, sticky="nsew")
         panel.grid_columnconfigure(0, weight=1)
+        panel.grid_rowconfigure(2, weight=1)  # scrollable area expands
 
-        ctk.CTkLabel(panel, text="Live Preview  (first 20 entries)",
-                     font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-                     text_color=TEXT_PRIMARY, anchor="w",
-                     ).grid(row=0, column=0, sticky="w", padx=18, pady=(18, 10))
+        ctk.CTkLabel(
+            panel, text=f"Live Preview  (first {self._PREV_TOTAL} entries)",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color=TEXT_PRIMARY, anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=18, pady=(18, 10))
+
+        # Warning label (spans full width, hidden by default)
+        warn = ctk.CTkLabel(
+            panel, text="",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color=CLR_WARNING, anchor="w", justify="left",
+        )
+        warn.grid(row=1, column=0, sticky="w", padx=18, pady=(0, 4))
+
+        # Scrollable container for the label grid
+        scroll = ctk.CTkScrollableFrame(
+            panel, fg_color="transparent", corner_radius=0,
+            scrollbar_button_color=BORDER_COLOR,
+            scrollbar_button_hover_color=TEXT_DIM,
+        )
+        scroll.grid(row=2, column=0, sticky="nsew", padx=8, pady=(0, 8))
+        for c in range(self._PREV_COLS):
+            scroll.grid_columnconfigure(c, weight=1)
 
         labels = []
-        for i in range(20):
+        for i in range(self._PREV_TOTAL):
+            r = i // self._PREV_COLS
+            c = i % self._PREV_COLS
             lbl = ctk.CTkLabel(
-                panel, text="",
+                scroll, text="",
                 font=ctk.CTkFont(family="Consolas", size=12),
                 text_color=ACCENT_CYAN if i % 2 == 0 else TEXT_MUTED,
                 anchor="w",
             )
-            lbl.grid(row=i + 1, column=0, sticky="w", padx=24, pady=1)
+            lbl.grid(row=r, column=c, sticky="w", padx=(10, 6), pady=2)
             labels.append(lbl)
 
-        return labels
+        return labels, warn
 
     def _build_send_buttons(self, parent, row: int, tab: str):
         lbl = ctk.CTkLabel(parent, text="Send exported list to Credential Tester:",
@@ -431,16 +467,22 @@ class WordlistGeneratorPage(ctk.CTkFrame):
 
     # ── Brute-force logic ─────────────────────────────────────────────────────
 
-    def _bf_charset(self) -> str:
+    def _bf_charset_and_sets(self) -> tuple[str, list[str]]:
         cs = ""
-        if self._bf_lower.get():  cs += CHARSET_LOWER
-        if self._bf_upper.get():  cs += CHARSET_UPPER
-        if self._bf_digits.get(): cs += CHARSET_DIGITS
-        if self._bf_syms.get():   cs += CHARSET_SYMBOLS
-        return cs
+        required: list[str] = []
+        for flag, chars in [
+            (self._bf_lower,  CHARSET_LOWER),
+            (self._bf_upper,  CHARSET_UPPER),
+            (self._bf_digits, CHARSET_DIGITS),
+            (self._bf_syms,   CHARSET_SYMBOLS),
+        ]:
+            if flag.get():
+                cs += chars
+                required.append(chars)
+        return cs, required
 
     def _bf_update(self):
-        cs = self._bf_charset()
+        cs, required = self._bf_charset_and_sets()
         try:
             mn = max(1, int(self._bf_min_var.get()))
             mx = max(mn, int(self._bf_max_var.get()))
@@ -453,21 +495,33 @@ class WordlistGeneratorPage(ctk.CTkFrame):
             for lbl in self._bf_preview:
                 lbl.configure(text="")
             return
-        gen = BruteforceGenerator(cs, mn, mx)
-        est = gen.estimated_count()
-        self._bf_estimate_lbl.configure(text=f"Estimated: {est:,} entries")
-        if est > MAX_ENTRIES:
-            self._bf_warn_lbl.configure(
-                text=f"⚠ Exceeds {MAX_ENTRIES:,}-entry cap. Narrow the range.")
+        n_req = len(required)
+        gen   = BruteforceGenerator(cs, mn, mx, required_sets=required)
+        est   = gen.estimated_count()
+        multi = n_req > 1
+        est_label = f"Up to {est:,} entries" if multi else f"Estimated: {est:,} entries"
+        self._bf_estimate_lbl.configure(text=est_label)
+        self._bf_warn_lbl.configure(text="")
+
+        # Impossible combination: max length too short to hold one char per set
+        if n_req > 1 and mx < n_req:
+            self._bf_preview_warn.configure(
+                text=f"⚠  Impossible combination: {n_req} character sets selected\n"
+                     f"    require at least {n_req} characters per word,\n"
+                     f"    but Max Length is {mx}.\n"
+                     f"    Increase Max Length to at least {n_req}."
+            )
+            for lbl in self._bf_preview:
+                lbl.configure(text="")
             self._bf_gen_btn.configure(state="disabled")
-        else:
-            self._bf_warn_lbl.configure(text="")
-            self._bf_gen_btn.configure(state="normal")
-        # Preview
+            return
+
+        self._bf_preview_warn.configure(text="")
+        self._bf_gen_btn.configure(state="normal")
         entries = []
         for w in gen:
             entries.append(w)
-            if len(entries) >= 20:
+            if len(entries) >= self._PREV_TOTAL:
                 break
         for i, lbl in enumerate(self._bf_preview):
             lbl.configure(text=entries[i] if i < len(entries) else "")
@@ -475,7 +529,7 @@ class WordlistGeneratorPage(ctk.CTkFrame):
     def _bf_generate(self):
         if self._gen_running:
             return
-        cs = self._bf_charset()
+        cs, required = self._bf_charset_and_sets()
         try:
             mn = max(1, int(self._bf_min_var.get()))
             mx = max(mn, int(self._bf_max_var.get()))
@@ -489,7 +543,7 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         )
         if not path:
             return
-        gen = BruteforceGenerator(cs, mn, mx)
+        gen = BruteforceGenerator(cs, mn, mx, required_sets=required)
         self._run_export(gen, path, self._bf_gen_btn, self._bf_status_lbl)
 
     # ── Mutation logic ────────────────────────────────────────────────────────
@@ -512,17 +566,13 @@ class WordlistGeneratorPage(ctk.CTkFrame):
         )
         est = gen.estimated_count()
         self._mut_estimate_lbl.configure(text=f"Estimated: {est:,} entries")
-        if est > MAX_ENTRIES:
-            self._mut_warn_lbl.configure(
-                text=f"⚠ Exceeds {MAX_ENTRIES:,}-entry cap. Reduce seeds or rules.")
-            self._mut_gen_btn.configure(state="disabled")
-        else:
-            self._mut_warn_lbl.configure(text="")
-            self._mut_gen_btn.configure(state="normal" if seeds else "disabled")
+        self._mut_warn_lbl.configure(text="")
+        self._mut_preview_warn.configure(text="")
+        self._mut_gen_btn.configure(state="normal" if seeds else "disabled")
         entries = []
         for w in gen:
             entries.append(w)
-            if len(entries) >= 20:
+            if len(entries) >= self._PREV_TOTAL:
                 break
         for i, lbl in enumerate(self._mut_preview):
             lbl.configure(text=entries[i] if i < len(entries) else "")

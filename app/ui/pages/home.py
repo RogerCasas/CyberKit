@@ -202,10 +202,8 @@ class HomePage(ctk.CTkFrame):
         ).grid(row=2, column=0, sticky="w", padx=40, pady=(32, 10))
 
         # ── Module card grid ──────────────────────────────────────────────────
-        card_container = ctk.CTkScrollableFrame(
+        card_container = ctk.CTkFrame(
             self, fg_color="transparent", corner_radius=0,
-            scrollbar_button_color=BORDER_COLOR,
-            scrollbar_button_hover_color=TEXT_DIM,
         )
         card_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=(0, 20))
         card_container.grid_columnconfigure((0, 1), weight=1)
@@ -287,10 +285,11 @@ class HomePage(ctk.CTkFrame):
             def click(e, p=mod["page"]):
                 self.navigate(p)
 
-            for w in card.winfo_children():
+            def _bind_tree(w):
                 w.bind("<Enter>", enter)
                 w.bind("<Leave>", leave)
                 w.bind("<Button-1>", click)
-            card.bind("<Enter>", enter)
-            card.bind("<Leave>", leave)
-            card.bind("<Button-1>", click)
+                for child in w.winfo_children():
+                    _bind_tree(child)
+
+            _bind_tree(card)

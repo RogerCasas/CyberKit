@@ -5,6 +5,7 @@ CyberKit — Root Application Window
 import customtkinter as ctk
 
 from app.ui.sidebar import Sidebar
+from app.ui.scrollable import AutoHideScrollFrame
 from app.ui.pages.home import HomePage
 from app.ui.pages.fuzzer import FuzzerPage
 from app.ui.pages.port_scanner import PortScannerPage
@@ -25,7 +26,7 @@ from app.ui.pages.arp_scanner import ARPScannerPage
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-BG_MAIN   = "#0f1117"
+BG_MAIN    = "#0f1117"
 BG_CONTENT = "#0f1117"
 
 
@@ -43,7 +44,10 @@ class AppWindow(ctk.CTk):
         self.minsize(self.MIN_W, self.MIN_H)
         self.configure(fg_color=BG_MAIN)
 
-        self._pages: dict[str, ctk.CTkFrame] = {}
+        # _pages  → actual page CTkFrame instances (for attribute access by other pages)
+        # _scrollers → AutoHideScrollFrame wrappers (raised on navigation)
+        self._pages:    dict[str, ctk.CTkFrame]          = {}
+        self._scrollers: dict[str, AutoHideScrollFrame]  = {}
         self._current_page: str | None = None
 
         self._build_layout()
@@ -53,44 +57,52 @@ class AppWindow(ctk.CTk):
     # ── Layout ────────────────────────────────────────────────────────────────
 
     def _build_layout(self):
-        # Sidebar
         self._sidebar = Sidebar(self, navigate_callback=self.show_page)
         self._sidebar.pack(side="left", fill="y")
 
-        # Content area fills remaining space
         self._content = ctk.CTkFrame(self, fg_color=BG_CONTENT, corner_radius=0)
         self._content.pack(side="left", fill="both", expand=True)
         self._content.grid_columnconfigure(0, weight=1)
         self._content.grid_rowconfigure(0, weight=1)
 
-    def _register_pages(self):
-        """Instantiate all pages and stack them in the content area."""
-        self._pages["home"]                = HomePage(self._content, navigate_callback=self.show_page)
-        self._pages["fuzzer"]              = FuzzerPage(self._content)
-        self._pages["port_scanner"]        = PortScannerPage(self._content)
-        self._pages["header_analyser"]     = HeaderAnalyserPage(self._content)
-        self._pages["credential_tester"]   = CredentialTesterPage(self._content)
-        self._pages["dns_enumerator"]      = DNSEnumeratorPage(self._content)
-        self._pages["encoder_decoder"]     = EncoderDecoderPage(self._content)
-        self._pages["hash_tool"]           = HashToolPage(self._content)
-        self._pages["tech_fingerprinter"]  = TechFingerprinterPage(self._content)
-        self._pages["ssl_analyser"]        = SslAnalyserPage(self._content)
-        self._pages["whois_geo"]           = WhoisGeoPage(self._content)
-        self._pages["http_builder"]        = HttpBuilderPage(self._content)
-        self._pages["sqli_tester"]         = SqliTesterPage(self._content)
-        self._pages["wordlist_generator"]  = WordlistGeneratorPage(self._content, navigate_callback=self.show_page)
-        self._pages["arp_scanner"]         = ARPScannerPage(self._content)
+    # ── Page registration ─────────────────────────────────────────────────────
 
-        for page in self._pages.values():
-            page.grid(row=0, column=0, sticky="nsew")
+    def _add_page(self, key: str, PageClass, **kwargs) -> None:
+        """Wrap a page in an AutoHideScrollFrame and stack it in the content area."""
+        scroller = AutoHideScrollFrame(self._content, fg_color=BG_CONTENT)
+        scroller.grid(row=0, column=0, sticky="nsew")
+
+        page = PageClass(scroller.inner, **kwargs)
+        page.pack(fill="both", expand=True)
+
+        self._scrollers[key] = scroller
+        self._pages[key]     = page
+
+    def _register_pages(self):
+        self._add_page("home",              HomePage,            navigate_callback=self.show_page)
+        self._add_page("fuzzer",            FuzzerPage)
+        self._add_page("port_scanner",      PortScannerPage)
+        self._add_page("header_analyser",   HeaderAnalyserPage)
+        self._add_page("credential_tester", CredentialTesterPage)
+        self._add_page("dns_enumerator",    DNSEnumeratorPage)
+        self._add_page("encoder_decoder",   EncoderDecoderPage)
+        self._add_page("hash_tool",         HashToolPage)
+        self._add_page("tech_fingerprinter",TechFingerprinterPage)
+        self._add_page("ssl_analyser",      SslAnalyserPage)
+        self._add_page("whois_geo",         WhoisGeoPage)
+        self._add_page("http_builder",      HttpBuilderPage)
+        self._add_page("sqli_tester",       SqliTesterPage)
+        self._add_page("wordlist_generator",WordlistGeneratorPage, navigate_callback=self.show_page)
+        self._add_page("arp_scanner",       ARPScannerPage)
 
     # ── Navigation ────────────────────────────────────────────────────────────
 
     def show_page(self, key: str):
-        if key not in self._pages:
+        if key not in self._scrollers:
             return
         if self._current_page == key:
             return
-        self._pages[key].tkraise()
+        self._scrollers[key].tkraise()
+        self._scrollers[key].scroll_to_top()
         self._current_page = key
         self._sidebar.set_active_page(key)

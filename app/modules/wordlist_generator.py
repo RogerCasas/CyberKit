@@ -17,21 +17,38 @@ LEET_MAP: dict[str, str] = {
     'o': '0', 's': '$', 't': '7',
 }
 
-MAX_ENTRIES = 1_000_000
+MAX_ENTRIES = 0  # 0 = no cap
 
 
 # ── Generators ────────────────────────────────────────────────────────────────
 
 class BruteforceGenerator:
-    def __init__(self, charset: str, min_len: int, max_len: int) -> None:
-        self.charset  = charset
-        self.min_len  = max(1, min_len)
-        self.max_len  = max(self.min_len, max_len)
+    def __init__(
+        self,
+        charset: str,
+        min_len: int,
+        max_len: int,
+        required_sets: list[str] | None = None,
+    ) -> None:
+        self.charset       = charset
+        self.min_len       = max(1, min_len)
+        self.max_len       = max(self.min_len, max_len)
+        # Each entry in required_sets is a set of characters; every generated
+        # word must contain at least one character from each group.
+        self.required_sets = [set(s) for s in required_sets] if required_sets else []
+
+    def _satisfies(self, word: str) -> bool:
+        if not self.required_sets:
+            return True
+        word_chars = set(word)
+        return all(word_chars & rset for rset in self.required_sets)
 
     def __iter__(self) -> Iterator[str]:
         for length in range(self.min_len, self.max_len + 1):
             for combo in itertools.product(self.charset, repeat=length):
-                yield "".join(combo)
+                word = "".join(combo)
+                if self._satisfies(word):
+                    yield word
 
     def estimated_count(self) -> int:
         base = len(self.charset)
@@ -110,7 +127,7 @@ def generate_to_file(
     buf: list[str] = []
     with open(path, "w", encoding="utf-8") as fh:
         for word in generator:
-            if stop_event.is_set() or written >= cap:
+            if stop_event.is_set():
                 break
             buf.append(word)
             written += 1
