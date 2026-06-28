@@ -4,6 +4,20 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-28 — Replanning: v4.0–v4.5 Milestones & Scope Expansion
+
+- Expanded roadmap with six new milestones (v4.0–v4.5) covering 13 new modules across UI reorganisation, web attack expansion, network recon, cryptanalysis & CTF utilities, OSINT, and blue-team forensics.
+- v4.0 introduces collapsible sidebar category groups and home page category sections, applying seven category labels retroactively to all existing tools.
+- v4.1 adds XSS Tester, CSRF Analyser, and Open Redirect Detector.
+- v4.2 adds Traceroute, Banner Grabber, and Packet Sniffer.
+- v4.3 adds JWT Forge & Verify and Cipher Identifier & Solver.
+- v4.4 adds Email Header Analyser, Robots.txt & Sitemap Parser, and CVE / Vulnerability Lookup.
+- v4.5 adds Log Analyser, File Metadata Extractor, and Hash Verifier.
+- Updated `tech-stack.md` with metadata extraction dependencies for v4.5 (`Pillow`, `pypdf`, `python-docx`, `openpyxl`), ADR-005 (collapsible sidebar accordion via `grid_remove` toggle), and ADR-006 (NVD unauthenticated rate-limit policy and 6-second query sleep).
+- Updated `mission.md` scope to explicitly include blue-team investigation alongside reconnaissance, enumeration, and analysis. Clarified that the v4.2 Packet Sniffer is an educational protocol visualiser, not a replacement for Wireshark.
+
+---
+
 ## 2026-06-27 — v3.2 Polish: Scrolling, UI Fixes & Privacy
 
 - Replaced the page-level scroll implementation (`AutoHideScrollFrame`) with a `CTkScrollbar`-based design: the scrollbar now matches the rounded, minimalist style used by `CTkScrollableFrame` throughout the app.
