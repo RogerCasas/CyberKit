@@ -26,10 +26,11 @@ CyberKit demystifies offensive and defensive security tooling by providing a mod
 
 ## Scope
 
-CyberKit covers **reconnaissance, enumeration, and analysis** phases of a pen-test. It deliberately stops short of exploitation frameworks (those belong in dedicated tools like Metasploit) to stay safe, legal, and educationally focused.
+CyberKit covers **reconnaissance, enumeration, analysis, and blue-team investigation** phases of security work. The v4.x roadmap expands into defensive tooling — log analysis, file metadata forensics, and integrity verification — to give learners visibility into both sides of the security picture. It deliberately stops short of exploitation frameworks (those belong in dedicated tools like Metasploit) to stay safe, legal, and educationally focused.
 
 ## Non-Goals
 
 - Not a terminal emulator or script runner.
-- Not a replacement for Burp Suite, Metasploit, or Wireshark.
+- Not a replacement for Burp Suite or Metasploit.
+- Not a replacement for Wireshark — the v4.2 Packet Sniffer is an educational visualiser for understanding protocol structure, not a full capture-and-analysis suite.
 - Not intended for automated mass-scanning of the public internet.
