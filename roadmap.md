@@ -100,6 +100,110 @@ Key infrastructure shipped in v1.0:
 
 ---
 
+---
+
+## v4.0 — UI Reorganisation: Category Grouping
+
+| Change | Area | Status |
+|---|---|---|
+| **Collapsible sidebar categories** | UI / Navigation | ⬜ Planned |
+| **Home page category sections** | UI / Home | ⬜ Planned |
+
+**Collapsible sidebar categories** — Replace the single flat "MODULES" list with named, collapsible category groups. Each group header (e.g. "Web / Active Testing") can be clicked to expand or collapse all tools within it. Expanded state persists while the app is running. Collapses all groups except the one containing the active page on navigation.
+
+**Home page category sections** — The home page card grid is reorganised into labelled sections matching the sidebar categories. A section heading (styled like the existing "AVAILABLE MODULES" label) appears above each group of cards. Existing Active/Coming Soon tags are preserved.
+
+Categories introduced in v4.0 (applied retroactively to all existing tools):
+
+| Category | Existing tools |
+|---|---|
+| Web / Active Testing | Dir Fuzzer, Header Analyser, HTTP Builder, SQLi Tester |
+| Network / Recon | Port Scanner, ARP Scanner |
+| Auth & Exploitation | Credential Tester |
+| DNS & OSINT | DNS Enumerator, WHOIS & Geo |
+| Cryptanalysis & Encoding | Hash Tool, Encoder / Decoder |
+| Tech Analysis | Tech Fingerprinter, SSL Analyser |
+| Wordlist & Utilities | Wordlist Generator |
+
+---
+
+## v4.1 — Web Attack Expansion
+
+| Module | Category | Core technique |
+|---|---|---|
+| **XSS Tester** | Web / Active Testing | Reflected XSS payload injection into GET/POST parameters; unescaped-payload detection in response |
+| **CSRF Analyser** | Web / Active Testing | SameSite cookie flags, anti-CSRF token presence, Origin/Referer validation check |
+| **Open Redirect Detector** | Web / Active Testing | URL parameter injection with external-host payloads; 3xx Location header inspection |
+
+**XSS Tester** — Inject common reflected XSS payloads (`<script>`, `"><img onerror=...>`, SVG vectors) into GET/POST parameters and detect whether they appear unescaped in the response body. Detection only — no browser execution. Teaches output-encoding failures.
+
+**CSRF Analyser** — Submit a request to a target endpoint and inspect: `Set-Cookie` headers for `SameSite` attribute, form HTML for hidden CSRF token fields, and server response to missing/spoofed `Origin`/`Referer` headers.
+
+**Open Redirect Detector** — Inject redirect payloads (`//evil.com`, `https://evil.com`, `\evil.com`) into URL parameters and POST body values; flag any 3xx response whose `Location` header resolves to an external domain.
+
+---
+
+## v4.2 — Network Recon Expansion
+
+| Module | Category | Core technique |
+|---|---|---|
+| **Traceroute** | Network / Recon | ICMP/UDP TTL-escalation probes; hop-by-hop latency + reverse-DNS |
+| **Banner Grabber** | Network / Recon | Raw TCP connect; service banner capture (SSH, FTP, SMTP, HTTP) |
+| **Packet Sniffer** | Network / Recon | Scapy passive capture; live table of src/dst/protocol/port ⚠ admin required |
+
+**Traceroute** — Send probes with incrementing TTL and display a live table of hop index, IP, reverse-DNS hostname, and RTT for each hop. Teaches routing, BGP handoff points, and geographic topology.
+
+**Banner Grabber** — Connect to a user-supplied host:port over raw TCP, send a minimal probe, and capture the service banner. Complements the Port Scanner: scanner finds what's open, Banner Grabber identifies the exact version string.
+
+**Packet Sniffer** — Passive Scapy capture on a selected network interface. Live Treeview of src IP, dst IP, protocol, src port, dst port, and payload preview. Filter by protocol (TCP/UDP/ICMP/ARP). Read-only — no packet injection. ⚠ Requires admin/root (extends existing Scapy dependency).
+
+---
+
+## v4.3 — Cryptanalysis & CTF Utilities
+
+| Module | Category | Core technique |
+|---|---|---|
+| **JWT Forge & Verify** | Cryptanalysis & Encoding | `alg:none` bypass attempt; HS256 secret brute-force via wordlist; decoded header/payload view |
+| **Cipher Identifier & Solver** | Cryptanalysis & Encoding | Index-of-coincidence + frequency analysis → Caesar/Vigenère/XOR/Rail Fence identification + one-click decrypt |
+
+**JWT Forge & Verify** — Extends the existing JWT inspection in Encoder/Decoder. Dedicated module: paste a JWT, attempt the `alg: none` bypass, brute-force a weak HS256 secret against a wordlist, and display the structured decoded token. Teaches JWT attack classes that appear in almost every CTF.
+
+**Cipher Identifier & Solver** — Paste ciphertext; the engine runs index-of-coincidence, letter frequency, and bigram analysis to identify the most likely classical cipher; offers a one-click solve with adjustable key. Covers Caesar, Vigenère, XOR, and Rail Fence.
+
+---
+
+## v4.4 — OSINT & Information Gathering
+
+| Module | Category | Core technique |
+|---|---|---|
+| **Email Header Analyser** | DNS & OSINT | Raw email header parse; relay hops, SPF/DKIM/DMARC evaluation, timestamp deltas |
+| **Robots.txt & Sitemap Parser** | DNS & OSINT | Fetch/parse `robots.txt` and `sitemap.xml`; disallowed paths + sitemap URL tree |
+| **CVE / Vulnerability Lookup** | DNS & OSINT | NVD public API query by product+version; CVE ID, CVSS score, summary |
+
+**Email Header Analyser** — Paste a raw email header (from "View Source" in any mail client) and extract: every relay hop with timestamp and IP, SPF/DKIM/DMARC pass/fail status, and any suspicious timestamp gaps. Teaches phishing investigation and mail-server forensics.
+
+**Robots.txt & Sitemap Parser** — Enter a domain; fetch and parse `robots.txt` (disallowed paths, crawl-delay, sitemaps referenced) and `sitemap.xml` (all listed URLs in a collapsible tree). Teaches how sites inadvertently expose their directory structure.
+
+**CVE / Vulnerability Lookup** — Query the NIST NVD REST API (no auth required) by product name and version; display matching CVEs sorted by CVSS score with a link to the full advisory. Teaches students to map discovered service versions to known public exploits.
+
+---
+
+## v4.5 — Forensics & Blue Team
+
+| Module | Category | Core technique |
+|---|---|---|
+| **Log Analyser** | Forensics / Blue Team | Apache/Nginx access log + auth.log parsing; top IPs, error spikes, failed-auth patterns |
+| **File Metadata Extractor** | Forensics / Blue Team | EXIF (images), PDF/Office metadata; GPS, author, creation tool extraction |
+| **Hash Verifier** | Forensics / Blue Team | Compute MD5/SHA-1/SHA-256/SHA-512 for a file; compare against expected hash string |
+
+**Log Analyser** — Open a local log file (Apache/Nginx access log, SSH `auth.log`, or Windows Event Log exported as CSV) and surface: top IPs by request count, 4xx/5xx error rate over time, failed SSH login attempts, and potential directory-traversal patterns. Teaches log-based threat hunting.
+
+**File Metadata Extractor** — Drag-and-drop a file and extract embedded metadata: EXIF data from images (GPS coordinates, camera model, capture timestamp), PDF author/creation-tool/modification history, and Office document last-modified-by. Teaches why metadata stripping matters before publishing files publicly.
+
+**Hash Verifier** — Select a file and enter an expected hash string; the tool computes MD5/SHA-1/SHA-256/SHA-512 and displays a clear pass/fail comparison. Simpler and more focused than the Hash Tool (which cracks hashes) — this is purely for download integrity and chain-of-custody verification.
+
+---
+
 ## SDD Process
 
 Each milestone follows this cycle:
