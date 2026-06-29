@@ -75,7 +75,7 @@
 - [ ] Clicking sidebar entry navigates to the correct page
 - [ ] Clicking home page card navigates to the correct page
 - [ ] Version label reads `v4.2.0` in sidebar footer
-- [ ] `roadmap.md` shows v4.2 ✅ Complete
+- [ ] `docs/roadmap.md` shows v4.2 ✅ Complete
 - [ ] All existing tests still pass (`tests/test_*.py`)
 
 ---

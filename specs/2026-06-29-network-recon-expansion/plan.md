@@ -102,7 +102,7 @@ Each group can be tested independently before the next begins.
 ### 5.4 — Update `app/ui/sidebar.py`
 - Version label: `"v4.2.0"`
 
-### 5.5 — Update `roadmap.md`
+### 5.5 — Update `docs/roadmap.md`
 - Mark v4.2 ✅ Complete; add Status column to table
 
 ### 5.6 — Commit spec files on branch
