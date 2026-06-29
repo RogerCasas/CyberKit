@@ -19,6 +19,9 @@ from app.ui.pages.ssl_analyser import SslAnalyserPage
 from app.ui.pages.whois_geo import WhoisGeoPage
 from app.ui.pages.http_builder import HttpBuilderPage
 from app.ui.pages.sqli_tester import SqliTesterPage
+from app.ui.pages.xss_tester import XssTesterPage
+from app.ui.pages.csrf_analyser import CsrfAnalyserPage
+from app.ui.pages.open_redirect import OpenRedirectPage
 from app.ui.pages.wordlist_generator import WordlistGeneratorPage
 from app.ui.pages.arp_scanner import ARPScannerPage
 
@@ -92,6 +95,9 @@ class AppWindow(ctk.CTk):
         self._add_page("whois_geo",         WhoisGeoPage)
         self._add_page("http_builder",      HttpBuilderPage)
         self._add_page("sqli_tester",       SqliTesterPage)
+        self._add_page("xss_tester",        XssTesterPage)
+        self._add_page("csrf_analyser",     CsrfAnalyserPage)
+        self._add_page("open_redirect",     OpenRedirectPage)
         self._add_page("wordlist_generator",WordlistGeneratorPage, navigate_callback=self.show_page)
         self._add_page("arp_scanner",       ARPScannerPage)
 

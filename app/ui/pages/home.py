@@ -44,6 +44,24 @@ CARD_DATA: dict[str, dict] = {
         "desc": "Detect SQL injection in GET/POST parameters via error-based and boolean-based techniques. Detection only.",
         "tag": "Active", "tag_color": "#22c55e",
     },
+    "xss_tester": {
+        "icon": "🧨",
+        "title": "XSS Tester",
+        "desc": "Detect reflected XSS by injecting marked payloads into GET/POST parameters and finding unescaped reflections. Detection only.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "csrf_analyser": {
+        "icon": "🎫",
+        "title": "CSRF Analyser",
+        "desc": "Inspect CSRF posture: SameSite cookie flags, anti-CSRF form tokens, and Origin/Referer validation.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "open_redirect": {
+        "icon": "↪",
+        "title": "Open Redirect",
+        "desc": "Detect unvalidated redirects by injecting external-host payloads and inspecting 3xx Location headers. Detection only.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
     "port_scanner": {
         "icon": "🔍",
         "title": "Port Scanner",

@@ -4,9 +4,9 @@ CyberKit — SQL Injection Tester engine (detection only, no data extraction)
 
 import re
 from dataclasses import dataclass
-from urllib.parse import urlparse, urlencode, parse_qs
 
 from app.modules.http_builder import send
+from app.modules.web_injection import inject as _inject, parse_params as _parse_params
 
 
 @dataclass
@@ -115,8 +115,8 @@ def _check_error_patterns(body: str) -> tuple:
     return False, ""
 
 
-def _parse_params(url: str) -> list:
-    return list(parse_qs(urlparse(url).query).keys())
+# `_inject` and `_parse_params` are re-exported from app.modules.web_injection
+# (imported above) so the SQLi engine and its tests keep their existing names.
 
 
 # ── Internal probes ───────────────────────────────────────────────────────────
@@ -175,16 +175,3 @@ def _probe_boolean(url, method, param, timeout, probe_sets=None):
         parameter=param, payload=f"{len(probe_sets)} probe sets",
         detection_type="boolean-based", evidence="", is_vulnerable=False,
     )
-
-
-def _inject(url: str, method: str, param: str, payload: str) -> dict:
-    parsed = urlparse(url)
-    qs = parse_qs(parsed.query, keep_blank_values=True)
-    qs[param] = [payload]
-
-    if method.upper() == "GET":
-        new_query = urlencode(qs, doseq=True)
-        return {"url": parsed._replace(query=new_query).geturl(), "body": ""}
-    else:
-        flat = {k: v[0] if len(v) == 1 else v for k, v in qs.items()}
-        return {"url": parsed._replace(query="").geturl(), "body": urlencode(flat)}

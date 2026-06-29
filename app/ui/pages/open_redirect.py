@@ -1,5 +1,5 @@
 """
-CyberKit — SQL Injection Tester Page (detection only)
+CyberKit — Open Redirect Detector Page (detection only)
 """
 
 import queue
@@ -11,7 +11,7 @@ from urllib.parse import urlparse, parse_qs
 import customtkinter as ctk
 from app.ui.scrollable import autohide_vsb
 
-from app.modules.sqli_tester import InjectionResult, scan as sqli_scan
+from app.modules.open_redirect import RedirectResult, scan as redirect_scan, SENTINEL
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 BG_MAIN        = "#0f1117"
@@ -32,23 +32,8 @@ WARNING_TEXT   = "#f0a500"
 
 POLL_MS = 100
 
-_ERROR_ENTRIES = [
-    ("'",   "Unclosed single-quote — triggers syntax errors in most databases"),
-    ('"',   "Unclosed double-quote — MySQL ANSI_QUOTES and generic fallback"),
-    ("\\",  "Backslash escape — MySQL: escapes the closing quote, leaving the string open"),
-    ("')",  "Quote + close-paren — targets WHERE (col='value') contexts"),
-]
 
-_BOOL_ENTRIES = [
-    ("AND (string)",  "' AND 1=1--",    "' AND 1=2--",    "Standard string context"),
-    ("AND (numeric)", " AND 1=1",        " AND 1=2",        "Numeric column, no quote needed"),
-    ("OR (string)",   "' OR '1'='1'--",  "' OR '1'='2'--",  "OR variant for string context"),
-    ("AND (bracket)", "') AND ('1'='1",  "') AND ('1'='2",  "Bracketed WHERE (col='value')"),
-    ("OR (numeric)",  "' OR 1=1--",      "' OR 1=2--",      "OR variant for numeric context"),
-]
-
-
-class SqliTesterPage(ctk.CTkFrame):
+class OpenRedirectPage(ctk.CTkFrame):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, fg_color=BG_MAIN, corner_radius=0, **kwargs)
         self._result_queue: queue.Queue = queue.Queue()
@@ -58,7 +43,6 @@ class SqliTesterPage(ctk.CTkFrame):
         self._row_count = 0
         self._params: list[str] = []
         self._param_row_frames: dict = {}
-        self._payloads_expanded = False
         self._build()
 
     # ── Build ─────────────────────────────────────────────────────────────────
@@ -67,30 +51,26 @@ class SqliTesterPage(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self._scroll = ctk.CTkFrame(
-            self, fg_color=BG_MAIN, corner_radius=0,
-        )
+        self._scroll = ctk.CTkFrame(self, fg_color=BG_MAIN, corner_radius=0)
         self._scroll.grid(row=0, column=0, sticky="nsew")
         self._scroll.grid_columnconfigure(0, weight=1)
-        self._scroll.grid_rowconfigure(5, weight=1)  # results table fills leftover space
+        self._scroll.grid_rowconfigure(4, weight=1)  # results table fills leftover space
 
-        # Header
         hdr = ctk.CTkFrame(self._scroll, fg_color="transparent")
         hdr.grid(row=0, column=0, sticky="ew", padx=30, pady=(28, 0))
         hdr.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(
-            hdr, text="💉  SQL Injection Tester",
+            hdr, text="↪  Open Redirect Detector",
             font=ctk.CTkFont(family="Segoe UI", size=26, weight="bold"),
             text_color=TEXT_PRIMARY, anchor="w",
         ).grid(row=0, column=0, sticky="w")
         ctk.CTkLabel(
             hdr,
-            text="Detect error-based and boolean-based SQL injection  •  Detection only, no data extraction",
+            text="Detect unvalidated redirects  •  External-host payloads, Location header inspection",
             font=ctk.CTkFont(family="Segoe UI", size=12),
             text_color=TEXT_MUTED, anchor="w",
         ).grid(row=1, column=0, sticky="w", pady=(4, 0))
 
-        # Disclaimer
         banner = ctk.CTkFrame(self._scroll, fg_color=WARNING_BG, corner_radius=8,
                               border_width=1, border_color=WARNING_BORDER)
         banner.grid(row=1, column=0, sticky="ew", padx=30, pady=(16, 0))
@@ -106,7 +86,6 @@ class SqliTesterPage(ctk.CTkFrame):
 
         self._build_controls()
         self._build_params()
-        self._build_payloads_panel()
         self._build_table()
 
     def _build_controls(self):
@@ -130,7 +109,7 @@ class SqliTesterPage(ctk.CTkFrame):
 
         self._url_entry = ctk.CTkEntry(
             ctrl,
-            placeholder_text="http://localhost/?id=1",
+            placeholder_text="http://localhost/login?next=/home",
             font=ctk.CTkFont(family="Segoe UI", size=13),
             fg_color=BG_INPUT, border_color=BORDER_COLOR,
             text_color=TEXT_PRIMARY, height=38,
@@ -156,8 +135,7 @@ class SqliTesterPage(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             width=60, height=32, corner_radius=6,
             fg_color=BG_INPUT, hover_color=BG_CARD,
-            border_width=1, border_color=BORDER_COLOR,
-            text_color=TEXT_MUTED,
+            border_width=1, border_color=BORDER_COLOR, text_color=TEXT_MUTED,
             command=lambda: self._set_method("POST"),
         )
         self._post_btn.grid(row=0, column=1, padx=(0, 12))
@@ -256,167 +234,46 @@ class SqliTesterPage(ctk.CTkFrame):
             command=self._add_param_from_entry,
         ).grid(row=0, column=1)
 
-    def _build_payloads_panel(self):
-        card = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
-                            border_width=1, border_color=BORDER_COLOR)
-        card.grid(row=4, column=0, sticky="ew", padx=30, pady=(10, 0))
-        card.grid_columnconfigure(0, weight=1)
-
-        hdr = ctk.CTkFrame(card, fg_color="transparent", cursor="hand2")
-        hdr.grid(row=0, column=0, sticky="ew", padx=4, pady=0)
-        hdr.grid_columnconfigure(1, weight=1)
-
-        self._payloads_arrow = ctk.CTkLabel(
-            hdr, text="▶",
-            font=ctk.CTkFont(family="Segoe UI", size=10),
-            text_color=TEXT_DIM,
-        )
-        self._payloads_arrow.grid(row=0, column=0, padx=(10, 6), pady=10)
-
         ctk.CTkLabel(
-            hdr, text="Payloads used",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
-            text_color=TEXT_MUTED, anchor="w",
-        ).grid(row=0, column=1, sticky="w", pady=10)
-
-        ctk.CTkLabel(
-            hdr,
-            text="4 error payloads  •  5 boolean probe sets",
+            card,
+            text=f"Payloads target the sentinel host '{SENTINEL}' "
+                 "(scheme-relative, absolute, backslash, and suffix-bypass variants). "
+                 "A 3xx Location pointing at the sentinel is flagged vulnerable.",
             font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color=TEXT_DIM, anchor="e",
-        ).grid(row=0, column=2, sticky="e", padx=(0, 14), pady=10)
-
-        for widget in (hdr, self._payloads_arrow) + tuple(hdr.winfo_children()):
-            widget.bind("<Button-1>", lambda e: self._toggle_payloads())
-
-        self._payloads_body = ctk.CTkFrame(card, fg_color="transparent")
-        self._payloads_body.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
-        self._payloads_body.grid_columnconfigure((0, 1), weight=1)
-        self._payloads_body.grid_remove()
-
-        err_sec = ctk.CTkFrame(self._payloads_body, fg_color="transparent")
-        err_sec.grid(row=0, column=0, sticky="new", padx=(0, 16))
-
-        ctk.CTkLabel(
-            err_sec, text="ERROR PAYLOADS",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            text_color=TEXT_DIM, anchor="w",
-        ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
-
-        for i, (payload, desc) in enumerate(_ERROR_ENTRIES):
-            ctk.CTkLabel(
-                err_sec, text=payload,
-                font=ctk.CTkFont(family="Consolas", size=12),
-                text_color=ACCENT_CYAN, fg_color=BG_INPUT,
-                corner_radius=4, padx=8, pady=2,
-            ).grid(row=i + 1, column=0, sticky="w", padx=(0, 10), pady=3)
-            ctk.CTkLabel(
-                err_sec, text=desc,
-                font=ctk.CTkFont(family="Segoe UI", size=11),
-                text_color=TEXT_MUTED, anchor="w",
-            ).grid(row=i + 1, column=1, sticky="w", pady=3)
-
-        bool_sec = ctk.CTkFrame(self._payloads_body, fg_color="transparent")
-        bool_sec.grid(row=0, column=1, sticky="new")
-        bool_sec.grid_columnconfigure(2, weight=1)
-
-        ctk.CTkLabel(
-            bool_sec, text="BOOLEAN PROBE SETS",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            text_color=TEXT_DIM, anchor="w",
-        ).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0, 6))
-
-        for i, (label, true_p, false_p, purpose) in enumerate(_BOOL_ENTRIES):
-            ctk.CTkLabel(
-                bool_sec, text=label,
-                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                text_color=TEXT_PRIMARY, anchor="w", width=100,
-            ).grid(row=i + 1, column=0, sticky="w", padx=(0, 8), pady=3)
-            ctk.CTkLabel(
-                bool_sec, text=true_p,
-                font=ctk.CTkFont(family="Consolas", size=11),
-                text_color=CLR_OK, fg_color=BG_INPUT,
-                corner_radius=4, padx=6, pady=2,
-            ).grid(row=i + 1, column=1, sticky="w", padx=(0, 4), pady=3)
-            ctk.CTkLabel(
-                bool_sec, text=false_p,
-                font=ctk.CTkFont(family="Consolas", size=11),
-                text_color=CLR_ERROR, fg_color=BG_INPUT,
-                corner_radius=4, padx=6, pady=2,
-            ).grid(row=i + 1, column=2, sticky="w", padx=(0, 10), pady=3)
-            ctk.CTkLabel(
-                bool_sec, text=purpose,
-                font=ctk.CTkFont(family="Segoe UI", size=11),
-                text_color=TEXT_DIM, anchor="w",
-            ).grid(row=i + 1, column=3, sticky="w", pady=3)
-
-    def _toggle_payloads(self):
-        self._payloads_expanded = not self._payloads_expanded
-        if self._payloads_expanded:
-            self._payloads_body.grid()
-            self._payloads_arrow.configure(text="▼")
-        else:
-            self._payloads_body.grid_remove()
-            self._payloads_arrow.configure(text="▶")
-        # The enclosing AutoHideScrollFrame pins this page's height, so
-        # grid()/grid_remove() here never fires a <Configure> it can see.
-        # Ask it to re-measure so the scrollbar appears when the expanded
-        # panel pushes content past the viewport.
-        self._request_resync()
-
-    def _request_resync(self):
-        """Walk up to the enclosing AutoHideScrollFrame and trigger a re-sync."""
-        # Force the just-changed grid layout to propagate so the scroll frame
-        # measures the NEW requested height, not the stale pre-toggle one.
-        self.update_idletasks()
-        w = self.master
-        while w is not None:
-            sync = getattr(w, "_schedule_sync", None)
-            if callable(sync):
-                sync()
-                return
-            w = getattr(w, "master", None)
+            text_color=TEXT_DIM, anchor="w", justify="left", wraplength=900,
+        ).grid(row=3, column=0, sticky="w", padx=14, pady=(0, 12))
 
     def _build_table(self):
         wrapper = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
                                border_width=1, border_color=BORDER_COLOR)
-        wrapper.grid(row=5, column=0, sticky="nsew", padx=30, pady=(10, 30))
+        wrapper.grid(row=4, column=0, sticky="nsew", padx=30, pady=(10, 30))
         wrapper.grid_columnconfigure(0, weight=1)
         wrapper.grid_rowconfigure(1, weight=1)
 
         ctk.CTkLabel(
-            wrapper, text="Injection Results",
+            wrapper, text="Redirect Results",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             text_color=TEXT_MUTED, anchor="w",
         ).grid(row=0, column=0, sticky="w", padx=16, pady=(12, 8))
 
         style = ttk.Style()
-        style.configure("SQLi.Treeview",
+        style.configure("Redir.Treeview",
             background=BG_TABLE_ROW, foreground=TEXT_PRIMARY,
             fieldbackground=BG_TABLE_ROW, rowheight=34,
-            borderwidth=0, relief="flat",
-            font=("Segoe UI", 11),
-        )
-        style.configure("SQLi.Treeview.Heading",
+            borderwidth=0, relief="flat", font=("Segoe UI", 11))
+        style.configure("Redir.Treeview.Heading",
             background=BG_INPUT, foreground=TEXT_MUTED,
-            borderwidth=0, relief="flat",
-            font=("Segoe UI", 11, "bold"),
-        )
-        style.map("SQLi.Treeview",
+            borderwidth=0, relief="flat", font=("Segoe UI", 11, "bold"))
+        style.map("Redir.Treeview",
             background=[("selected", "#1a2332")],
-            foreground=[("selected", TEXT_PRIMARY)],
-        )
-        style.map("SQLi.Treeview.Heading",
+            foreground=[("selected", TEXT_PRIMARY)])
+        style.map("Redir.Treeview.Heading",
             background=[("active", BG_CARD), ("pressed", BG_INPUT)],
-            relief=[("active", "flat"), ("pressed", "flat")],
-        )
-        style.configure("SQLi.Vertical.TScrollbar",
+            relief=[("active", "flat"), ("pressed", "flat")])
+        style.configure("Redir.Vertical.TScrollbar",
             background=BORDER_COLOR, troughcolor=BG_CARD,
-            arrowcolor=TEXT_MUTED, borderwidth=0, relief="flat",
-        )
-        style.map("SQLi.Vertical.TScrollbar",
-            background=[("active", TEXT_MUTED)],
-        )
+            arrowcolor=TEXT_MUTED, borderwidth=0, relief="flat")
+        style.map("Redir.Vertical.TScrollbar", background=[("active", TEXT_MUTED)])
 
         tree_frame = tk.Frame(wrapper, bg=BG_CARD)
         tree_frame.grid(row=1, column=0, sticky="nsew")
@@ -424,31 +281,27 @@ class SqliTesterPage(ctk.CTkFrame):
         tree_frame.grid_rowconfigure(0, weight=1)
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical",
-                            style="SQLi.Vertical.TScrollbar")
+                            style="Redir.Vertical.TScrollbar")
         vsb.grid(row=0, column=1, sticky="ns")
 
         self._tree = ttk.Treeview(
             tree_frame,
-            columns=("param", "payload", "type", "evidence", "verdict"),
-            show="headings",
-            style="SQLi.Treeview",
-            yscrollcommand=autohide_vsb(vsb),
-            height=6,
+            columns=("param", "payload", "status", "location", "verdict"),
+            show="headings", style="Redir.Treeview",
+            yscrollcommand=autohide_vsb(vsb), height=6,
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")
 
-        self._tree.heading("param",    text="Parameter",  anchor="w")
-        self._tree.heading("payload",  text="Payload",    anchor="w")
-        self._tree.heading("type",     text="Type",       anchor="w")
-        self._tree.heading("evidence", text="Evidence",   anchor="w")
-        self._tree.heading("verdict",  text="Verdict",    anchor="center")
-
-        self._tree.column("param",    width=90,  anchor="w",      stretch=False, minwidth=70)
-        self._tree.column("payload",  width=120, anchor="w",      stretch=False, minwidth=80)
-        self._tree.column("type",     width=110, anchor="w",      stretch=False, minwidth=90)
-        self._tree.column("evidence", width=340, anchor="w",      stretch=True,  minwidth=150)
-        self._tree.column("verdict",  width=90,  anchor="center", stretch=False, minwidth=70)
+        for col, head, w, anc, stretch, mw in [
+            ("param",    "Parameter", 100, "w",      False, 70),
+            ("payload",  "Payload",   200, "w",      False, 120),
+            ("status",   "Status",    70,  "center", False, 60),
+            ("location", "Location",  280, "w",      True,  140),
+            ("verdict",  "Verdict",   100, "center", False, 80),
+        ]:
+            self._tree.heading(col, text=head, anchor=anc)
+            self._tree.column(col, width=w, anchor=anc, stretch=stretch, minwidth=mw)
 
         self._tree.tag_configure("vulnerable", foreground=CLR_ERROR)
         self._tree.tag_configure("clean",      foreground=CLR_OK)
@@ -483,25 +336,15 @@ class SqliTesterPage(ctk.CTkFrame):
         if not url:
             self._parse_error.configure(text="Enter a URL first.")
             return
-
         parsed = urlparse(url if "://" in url else "http://" + url)
         found = list(parse_qs(parsed.query).keys())
-
         if not found:
             self._parse_error.configure(text="No query parameters found.")
             return
-
         for w in self._params_scroll.winfo_children():
             w.destroy()
         self._params.clear()
         self._param_row_frames.clear()
-        self._params_placeholder = ctk.CTkLabel(
-            self._params_scroll,
-            text="No parameters — parse from URL or add manually.",
-            font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color=TEXT_DIM,
-        )
-
         for p in found:
             self._add_param(p)
 
@@ -519,10 +362,8 @@ class SqliTesterPage(ctk.CTkFrame):
 
         row = ctk.CTkFrame(self._params_scroll, fg_color="transparent")
         row.pack(fill="x", pady=1)
-
         ctk.CTkLabel(
-            row,
-            text=f"  {name}",
+            row, text=f"  {name}",
             font=ctk.CTkFont(family="Consolas", size=12),
             text_color=TEXT_PRIMARY, anchor="w",
         ).pack(side="left")
@@ -543,7 +384,6 @@ class SqliTesterPage(ctk.CTkFrame):
         ).pack(side="right", padx=(0, 4))
 
         self._param_row_frames[name] = row
-
         if hasattr(self, "_params_placeholder"):
             try:
                 self._params_placeholder.pack_forget()
@@ -555,7 +395,6 @@ class SqliTesterPage(ctk.CTkFrame):
     def _start_scan(self):
         if self._running:
             return
-
         self._inline_error.configure(text="")
         url = self._url_entry.get().strip()
         if not url:
@@ -563,7 +402,6 @@ class SqliTesterPage(ctk.CTkFrame):
             return
         if not url.startswith(("http://", "https://")):
             url = "http://" + url
-
         if not self._params:
             self._inline_error.configure(text="Add at least one parameter to test.")
             return
@@ -578,9 +416,7 @@ class SqliTesterPage(ctk.CTkFrame):
         self._scan_btn.configure(state="disabled")
         self._stop_btn.configure(state="normal")
         self._status_lbl.configure(
-            text=f"Scanning {len(self._params)} parameter(s)…",
-            text_color=TEXT_MUTED,
-        )
+            text=f"Scanning {len(self._params)} parameter(s)…", text_color=TEXT_MUTED)
 
         threading.Thread(
             target=self._run_scan,
@@ -596,17 +432,10 @@ class SqliTesterPage(ctk.CTkFrame):
 
     def _run_scan(self, url, method, params):
         try:
-            def result_cb(r):
-                self._result_queue.put(("result", r))
-
-            def progress_cb(current, total):
-                self._result_queue.put(("progress", current, total))
-
-            sqli_scan(
-                url, method, params,
-                timeout=10,
-                progress_cb=progress_cb,
-                result_cb=result_cb,
+            redirect_scan(
+                url, method, params, timeout=10,
+                progress_cb=lambda c, t: self._result_queue.put(("progress", c, t)),
+                result_cb=lambda r: self._result_queue.put(("result", r)),
                 stop_event=self._stop_event,
             )
             self._result_queue.put(("done",))
@@ -621,14 +450,11 @@ class SqliTesterPage(ctk.CTkFrame):
             except queue.Empty:
                 break
             drained += 1
-
             kind = msg[0]
             if kind == "progress":
                 _, current, total = msg
                 self._status_lbl.configure(
-                    text=f"Scanning parameter {current}/{total}…",
-                    text_color=TEXT_MUTED,
-                )
+                    text=f"Scanning parameter {current}/{total}…", text_color=TEXT_MUTED)
             elif kind == "result":
                 self._insert_row(msg[1])
             elif kind == "done":
@@ -638,16 +464,16 @@ class SqliTesterPage(ctk.CTkFrame):
                 self._inline_error.configure(text=f"Error: {msg[1]}")
                 self._finish_scan(stopped=True)
                 return
-
         self._poll_id = self.after(POLL_MS, self._poll)
 
-    def _insert_row(self, r: InjectionResult):
-        tag   = "vulnerable" if r.is_vulnerable else "clean"
-        alt   = "row_even" if self._row_count % 2 == 0 else "row_odd"
+    def _insert_row(self, r: RedirectResult):
+        tag = "vulnerable" if r.is_vulnerable else "clean"
+        alt = "row_even" if self._row_count % 2 == 0 else "row_odd"
         verdict = "VULNERABLE" if r.is_vulnerable else "Clean"
+        status = str(r.status_code) if r.status_code else "—"
         self._tree.insert(
             "", "end",
-            values=(r.parameter, r.payload, r.detection_type, r.evidence or "—", verdict),
+            values=(r.parameter, r.payload, status, r.location or "—", verdict),
             tags=(tag, alt),
         )
         self._row_count += 1
@@ -656,14 +482,12 @@ class SqliTesterPage(ctk.CTkFrame):
         self._running = False
         self._scan_btn.configure(state="normal")
         self._stop_btn.configure(state="disabled")
-
         vuln = sum(
             1 for iid in self._tree.get_children()
             if "vulnerable" in self._tree.item(iid, "tags")
         )
-        total = self._row_count
         suffix = " (stopped)" if stopped else ""
         self._status_lbl.configure(
-            text=f"Done{suffix}  —  {vuln} vulnerable finding(s) across {total} probe(s)",
+            text=f"Done{suffix}  —  {vuln} open redirect(s) across {self._row_count} parameter(s)",
             text_color=CLR_ERROR if vuln else CLR_OK,
         )

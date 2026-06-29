@@ -4,6 +4,21 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-29 — v4.1 Web Attack Expansion
+
+- Added **XSS Tester** module: injects marker-tagged reflected-XSS payloads (`<script>`, `"><img onerror>`, `<svg onload>`, attribute breakout) into GET/POST parameters and flags any reflected back **unescaped**. Distinguishes raw reflection (vulnerable) from HTML-entity-encoded reflection (safe) and reports the reflection context (HTML body / attribute / script). Detection only — no browser execution.
+- Added **CSRF Analyser** module: inspects a target's CSRF posture — `Set-Cookie` `SameSite`/`Secure` flags, presence of hidden anti-CSRF form tokens, and a best-effort `Origin`/`Referer` validation probe (reported as informational, not a hard verdict). Findings shown with `ok` / `info` / `warn` / `high` severity.
+- Added **Open Redirect Detector** module: injects external-host payloads (scheme-relative `//`, absolute, backslash, and suffix-bypass variants) targeting a fixed non-resolving sentinel host into GET/POST parameters, sends with redirects disabled, and flags any 3xx whose `Location` resolves off-site.
+- Added `app/modules/web_injection.py` shared helper (`parse_params`, `inject`) and refactored the SQL Injection Tester to use it, so all injection modules parse and inject parameters identically.
+- Added three UI pages (XSS Tester, CSRF Analyser, Open Redirect) under the **Web / Active Testing** category; wired them into the sidebar accordion, home-page cards (all Active), and page router; bumped the version label to `v4.1.0`.
+- Added 41 automated engine tests (web-injection 6, XSS 11, Open Redirect 13, CSRF 11); the SQLi refactor is regression-guarded by its existing 18 tests (115 tests pass in total).
+- Fixed the results tables on the SQLi, XSS, and Open Redirect pages rendering only ~1–2 rows: gave the table row vertical weight and replaced the parameter list's `CTkScrollableFrame` (which ignores its `height` and balloons its requested size) with a plain frame, so the table fills the available space and grows with the window.
+- Fixed the SQL Injection Tester scrollbar not activating when the "Payloads used" panel is expanded — the page now forces the layout to settle and asks the enclosing scroll frame to re-measure after the toggle. Removed the hover colour-change on the panel header.
+- Added `testbed/vuln_server.py`: a local, stdlib-only, deliberately-vulnerable server (reflected-XSS, error-based SQLi, open-redirect, and CSRF-weak endpoints, bound to `127.0.0.1`) for safely exercising the new tools on localhost.
+- Marked v4.1 ✅ Complete in `roadmap.md`.
+
+---
+
 ## 2026-06-29 — v4.0 UI Category Grouping & Scroll Fixes
 
 - Implemented the v4.0 **collapsible sidebar category accordion**: the flat "MODULES" list is now grouped into seven named, collapsible categories (Web / Active Testing, Network / Recon, Auth & Exploitation, DNS & OSINT, Cryptanalysis & Encoding, Tech Analysis, Wordlist & Utilities). Each header expands/collapses its tools; expanded state persists while the app runs.
