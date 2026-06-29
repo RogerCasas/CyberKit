@@ -28,6 +28,9 @@ CATEGORIES: list[Category] = [
         ToolEntry("Header Analyser", "🛡", "header_analyser"),
         ToolEntry("HTTP Builder",    "📡", "http_builder"),
         ToolEntry("SQLi Tester",     "💉", "sqli_tester"),
+        ToolEntry("XSS Tester",      "🧨", "xss_tester"),
+        ToolEntry("CSRF Analyser",   "🎫", "csrf_analyser"),
+        ToolEntry("Open Redirect",   "↪",  "open_redirect"),
     ]),
     Category("network_recon", "Network / Recon", [
         ToolEntry("Port Scanner",    "🔍", "port_scanner"),

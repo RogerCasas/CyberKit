@@ -127,13 +127,13 @@ Categories introduced in v4.0 (applied retroactively to all existing tools):
 
 ---
 
-## v4.1 — Web Attack Expansion
+## v4.1 — Web Attack Expansion ✅ Complete
 
-| Module | Category | Core technique |
-|---|---|---|
-| **XSS Tester** | Web / Active Testing | Reflected XSS payload injection into GET/POST parameters; unescaped-payload detection in response |
-| **CSRF Analyser** | Web / Active Testing | SameSite cookie flags, anti-CSRF token presence, Origin/Referer validation check |
-| **Open Redirect Detector** | Web / Active Testing | URL parameter injection with external-host payloads; 3xx Location header inspection |
+| Module | Category | Core technique | Status |
+|---|---|---|---|
+| **XSS Tester** | Web / Active Testing | Reflected XSS payload injection into GET/POST parameters; unescaped-payload detection in response | ✅ Done |
+| **CSRF Analyser** | Web / Active Testing | SameSite cookie flags, anti-CSRF token presence, Origin/Referer validation check | ✅ Done |
+| **Open Redirect Detector** | Web / Active Testing | URL parameter injection with external-host payloads; 3xx Location header inspection | ✅ Done |
 
 **XSS Tester** — Inject common reflected XSS payloads (`<script>`, `"><img onerror=...>`, SVG vectors) into GET/POST parameters and detect whether they appear unescaped in the response body. Detection only — no browser execution. Teaches output-encoding failures.
 
