@@ -9,6 +9,7 @@ from datetime import datetime
 from tkinter import filedialog, ttk
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.modules.tech_fingerprinter import TechFingerprintEngine, FingerprintResult
 
@@ -221,8 +222,9 @@ class TechFingerprinterPage(ctk.CTkFrame):
             tree_frame,
             columns=("#", "category", "name", "evidence"),
             show="headings",
+            height=1,
             style="FP.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")

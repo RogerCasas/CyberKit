@@ -102,12 +102,12 @@ Key infrastructure shipped in v1.0:
 
 ---
 
-## v4.0 — UI Reorganisation: Category Grouping
+## v4.0 — UI Reorganisation: Category Grouping ✅ Complete
 
 | Change | Area | Status |
 |---|---|---|
-| **Collapsible sidebar categories** | UI / Navigation | ⬜ Planned |
-| **Home page category sections** | UI / Home | ⬜ Planned |
+| **Collapsible sidebar categories** | UI / Navigation | ✅ Done |
+| **Home page category sections** | UI / Home | ✅ Done |
 
 **Collapsible sidebar categories** — Replace the single flat "MODULES" list with named, collapsible category groups. Each group header (e.g. "Web / Active Testing") can be clicked to expand or collapse all tools within it. Expanded state persists while the app is running. Collapses all groups except the one containing the active page on navigation.
 

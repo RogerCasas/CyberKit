@@ -11,6 +11,7 @@ from datetime import datetime
 from tkinter import filedialog, ttk
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.data.wordlists import DEFAULT_USERNAMES, DEFAULT_PASSWORDS
 from app.modules.credential_http_scanner import (
@@ -411,8 +412,9 @@ class CredentialTesterPage(ctk.CTkFrame):
             tf,
             columns=("idx", "username", "password", "status", "code"),
             show="headings",
+            height=1,
             style="Cred.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._http_tree.yview)
         self._http_tree.grid(row=0, column=0, sticky="nsew")
@@ -1031,7 +1033,7 @@ class CredentialTesterPage(ctk.CTkFrame):
 
         tree = ttk.Treeview(
             tree_frame, columns=columns, show="headings",
-            style=style_name, yscrollcommand=vsb.set,
+            height=1, style=style_name, yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=tree.yview)
         tree.grid(row=0, column=0, sticky="nsew")

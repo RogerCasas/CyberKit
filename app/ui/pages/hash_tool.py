@@ -156,7 +156,7 @@ class HashToolPage(ctk.CTkFrame):
             text_color=TEXT_MUTED, anchor="w",
         ).grid(row=0, column=0, sticky="w", padx=16, pady=(12, 8))
 
-        self._id_scrollable = ctk.CTkScrollableFrame(
+        self._id_scrollable = ctk.CTkFrame(
             results, fg_color="transparent", corner_radius=0,
         )
         self._id_scrollable.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))

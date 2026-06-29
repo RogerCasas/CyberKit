@@ -9,6 +9,7 @@ from tkinter import ttk
 from urllib.parse import urlparse, parse_qs
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.modules.sqli_tester import InjectionResult, scan as sqli_scan
 
@@ -415,8 +416,8 @@ class SqliTesterPage(ctk.CTkFrame):
             columns=("param", "payload", "type", "evidence", "verdict"),
             show="headings",
             style="SQLi.Treeview",
-            yscrollcommand=vsb.set,
-            height=10,
+            yscrollcommand=autohide_vsb(vsb),
+            height=1,
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")
