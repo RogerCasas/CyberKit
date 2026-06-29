@@ -74,6 +74,24 @@ CARD_DATA: dict[str, dict] = {
         "desc": "Discover live hosts on a local subnet via layer-2 ARP broadcast. Shows IP, MAC, vendor, and hostname. Requires administrator privileges.",
         "tag": "Active", "tag_color": "#22c55e",
     },
+    "traceroute": {
+        "icon": "🗺",
+        "title": "Traceroute",
+        "desc": "Visualise the hop-by-hop path to a target using TTL-escalating ICMP/UDP probes. Shows IP, hostname, and RTT for each hop. Requires administrator privileges.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "banner_grabber": {
+        "icon": "🖧",
+        "title": "Banner Grabber",
+        "desc": "Raw TCP connect to a host:port and capture the service banner (SSH, FTP, SMTP, HTTP, …). Optional TLS wrapping.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "packet_sniffer": {
+        "icon": "🔬",
+        "title": "Packet Sniffer",
+        "desc": "Passive capture on a selected network interface. Live table of src/dst IP, protocol, ports, and payload preview. Read-only. Requires administrator privileges.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
     "credential_tester": {
         "icon": "🔑",
         "title": "Credential Tester",

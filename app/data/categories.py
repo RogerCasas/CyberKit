@@ -35,6 +35,9 @@ CATEGORIES: list[Category] = [
     Category("network_recon", "Network / Recon", [
         ToolEntry("Port Scanner",    "🔍", "port_scanner"),
         ToolEntry("ARP Scanner",     "📡", "arp_scanner"),
+        ToolEntry("Traceroute",      "🗺", "traceroute"),
+        ToolEntry("Banner Grabber",  "🖧", "banner_grabber"),
+        ToolEntry("Packet Sniffer",  "🔬", "packet_sniffer"),
     ]),
     Category("auth_exploit", "Auth & Exploitation", [
         ToolEntry("Cred Tester",     "🔑", "credential_tester"),
