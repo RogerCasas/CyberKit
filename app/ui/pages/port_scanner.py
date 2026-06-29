@@ -9,6 +9,7 @@ from datetime import datetime
 from tkinter import filedialog, ttk
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.data.port_lists import TOP_1000_PORTS
 from app.modules.port_scanner import (
@@ -403,8 +404,9 @@ class PortScannerPage(ctk.CTkFrame):
             tree_frame,
             columns=("port", "service", "status", "banner", "ms"),
             show="headings",
+            height=1,
             style="Port.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")

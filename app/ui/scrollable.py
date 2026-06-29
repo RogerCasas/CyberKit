@@ -16,6 +16,25 @@ import customtkinter as ctk
 _STYLE_APPLIED = False
 
 
+def autohide_vsb(vsb: ttk.Scrollbar):
+    """
+    Return a yscrollcommand callable that auto-hides a ttk.Scrollbar via
+    grid_remove / grid so it only appears when the content actually overflows.
+    Call this immediately after vsb.grid(...) and pass the result as the
+    widget's yscrollcommand.
+    """
+    vsb.grid_remove()
+
+    def _set(first: str, last: str) -> None:
+        if float(first) <= 0.0 and float(last) >= 1.0:
+            vsb.grid_remove()
+        else:
+            vsb.grid()
+        vsb.set(first, last)
+
+    return _set
+
+
 def _ensure_style():
     global _STYLE_APPLIED
     if _STYLE_APPLIED:
@@ -40,11 +59,13 @@ class AutoHideScrollFrame(ctk.CTkFrame):
     style of CTkScrollableFrame used elsewhere in the app.
     """
 
-    # Match the button_color / hover used by CTkScrollableFrame across the app.
     _BTN_COLOR       = "#21262d"
     _BTN_HOVER_COLOR = "#484f58"
 
-    def __init__(self, parent, fg_color: str = "#0f1117", **kwargs):
+    def __init__(self, parent, fg_color: str = "#0f1117",
+                 scrollbar_button_color: str | None = None,
+                 scrollbar_button_hover_color: str | None = None,
+                 **kwargs):
         _ensure_style()
         super().__init__(parent, fg_color=fg_color, corner_radius=0, **kwargs)
 
@@ -53,17 +74,18 @@ class AutoHideScrollFrame(ctk.CTkFrame):
         self._destroyed = False
         self._sync_pending = False
 
+        btn_color   = scrollbar_button_color       or self._BTN_COLOR
+        btn_hover   = scrollbar_button_hover_color or self._BTN_HOVER_COLOR
+
         self._canvas = tk.Canvas(
             self, bg=fg_color, highlightthickness=0, bd=0
         )
-        # CTkScrollbar gives the same pill-shaped, arrow-free look as
-        # CTkScrollableFrame — the style the rest of the app uses.
         self._vsb = ctk.CTkScrollbar(
             self,
             orientation="vertical",
             command=self._canvas.yview,
-            button_color=self._BTN_COLOR,
-            button_hover_color=self._BTN_HOVER_COLOR,
+            button_color=btn_color,
+            button_hover_color=btn_hover,
             fg_color="transparent",
         )
         self._inner = ctk.CTkFrame(
@@ -73,9 +95,16 @@ class AutoHideScrollFrame(ctk.CTkFrame):
             (0, 0), window=self._inner, anchor="nw"
         )
 
+        # Lay out canvas + scrollbar with grid, not pack. With pack, the canvas
+        # (expand=True) claims the full width and a scrollbar packed in later
+        # collapses to 1 px and never shows. grid reserves column 1 for the
+        # scrollbar so grid()/grid_remove() toggle it reliably.
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         self._canvas.configure(yscrollcommand=self._on_yscroll)
-        self._canvas.pack(side="left", fill="both", expand=True)
-        # scrollbar hidden until needed
+        self._canvas.grid(row=0, column=0, sticky="nsew")
+        self._vsb.grid(row=0, column=1, sticky="ns")
+        self._vsb.grid_remove()  # hidden until content overflows
 
         self._inner.bind("<Configure>", self._schedule_sync)
         self._canvas.bind("<Configure>", self._schedule_sync)
@@ -117,9 +146,9 @@ class AutoHideScrollFrame(ctk.CTkFrame):
     def _on_yscroll(self, first: str, last: str) -> None:
         """Show/hide scrollbar depending on whether all content is visible."""
         if float(first) <= 0.0 and float(last) >= 1.0:
-            self._vsb.pack_forget()
+            self._vsb.grid_remove()
         else:
-            self._vsb.pack(side="right", fill="y")
+            self._vsb.grid()
             self._vsb.set(float(first), float(last))
 
     def _schedule_sync(self, _event=None) -> None:
@@ -137,9 +166,21 @@ class AutoHideScrollFrame(ctk.CTkFrame):
         try:
             cw = self._canvas.winfo_width()
             ch = self._canvas.winfo_height()
-            rh = self._inner.winfo_reqheight()
-            h  = max(rh, ch) if ch > 1 else rh
-            self._canvas.itemconfig(self._win_id, width=max(cw, 1), height=h)
+            # Before the first geometry pass the canvas reports 1×1. Making a
+            # layout decision then sets a scrollregion taller than the (still 1 px)
+            # canvas, so yview() reports overflow and the scrollbar flashes on and
+            # sticks. Defer — the <Configure>/<Map> bindings re-fire _sync with
+            # real sizes once the widget is laid out.
+            if cw <= 1 or ch <= 1:
+                return
+            # winfo_reqheight() is the inner content's natural (minimum) height.
+            # ttk.Treeview / CTkTextbox in weight=1 rows expand to fill at runtime,
+            # so their height=1 keeps this minimum honest. Show the scrollbar only
+            # when the natural content height genuinely exceeds the visible height;
+            # otherwise pin inner to the canvas height so it fills the viewport.
+            rh_req = self._inner.winfo_reqheight()
+            h = max(rh_req, ch)
+            self._canvas.itemconfig(self._win_id, width=cw, height=h)
             self._canvas.configure(scrollregion=(0, 0, 0, h))
             # Manually trigger scrollbar visibility — Tk doesn't always fire
             # yscrollcommand when only scrollregion changes.

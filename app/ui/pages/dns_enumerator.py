@@ -11,6 +11,7 @@ from datetime import datetime
 from tkinter import filedialog, ttk
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.data.wordlists import SUBDOMAIN_WORDLIST
 from app.modules.dns_lookup_scanner import resolve_records, DNSRecord, SUPPORTED_TYPES
@@ -262,8 +263,9 @@ class DNSEnumeratorPage(ctk.CTkFrame):
             tf,
             columns=("rtype", "value", "ttl"),
             show="headings",
+            height=1,
             style="DNS.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._lookup_tree.yview)
         self._lookup_tree.grid(row=0, column=0, sticky="nsew")
@@ -554,8 +556,9 @@ class DNSEnumeratorPage(ctk.CTkFrame):
             tf,
             columns=("idx", "subdomain", "ip", "status"),
             show="headings",
+            height=1,
             style="Sub.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._sub_tree.yview)
         self._sub_tree.grid(row=0, column=0, sticky="nsew")

@@ -4,6 +4,21 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-06-29 — v4.0 UI Category Grouping & Scroll Fixes
+
+- Implemented the v4.0 **collapsible sidebar category accordion**: the flat "MODULES" list is now grouped into seven named, collapsible categories (Web / Active Testing, Network / Recon, Auth & Exploitation, DNS & OSINT, Cryptanalysis & Encoding, Tech Analysis, Wordlist & Utilities). Each header expands/collapses its tools; expanded state persists while the app runs.
+- Implemented the v4.0 **home page category sections**: the module card grid is reorganised into labelled sections matching the sidebar categories, each with a heading and separator, preserving the existing Active / Coming Soon tags.
+- Added `app/data/categories.py` as the single source of truth (`CATEGORIES`, `ToolEntry`, `Category`, `PAGE_TO_CATEGORY`) shared by the sidebar and home page.
+- Navigating to a tool auto-expands its category without collapsing the others; clicking **Home** collapses every category.
+- Added tooltips on the collapsed (icon-only) sidebar: hovering a tool icon now shows its name.
+- Fixed the sidebar navigation scrollbar never appearing when the category list overflows — `AutoHideScrollFrame` now lays out its canvas and scrollbar with `grid` (scrollbar in a reserved column toggled via `grid()`/`grid_remove()`) instead of `pack`, which starved a later-added scrollbar to 1 px. Gave the sidebar scrollbar visible thumb colours.
+- Fixed the spurious scrollbar that appeared mid-page on ARP Scanner, WHOIS & Geo, Hash Tool, Encoder/Decoder, Tech Fingerprinter, and SSL Analyser. `AutoHideScrollFrame._sync` now defers layout until the canvas has a real size and compares the content's natural height against the viewport, so the scrollbar shows only on genuine overflow.
+- Set `height=1` on all ten `ttk.Treeview` result tables so their inflated 10-row (~320 px) minimum no longer pushes pages past the viewport; they still expand to fill via `weight=1` at runtime.
+- Replaced redundant `CTkScrollableFrame` wrappers with `CTkFrame` in the Hash Tool and SSL Analyser detail panels, and switched Treeview scrollbars to the auto-hiding `autohide_vsb` helper.
+- Marked v4.0 ✅ Complete in `roadmap.md`.
+
+---
+
 ## 2026-06-28 — Replanning: v4.0–v4.5 Milestones & Scope Expansion
 
 - Expanded roadmap with six new milestones (v4.0–v4.5) covering 13 new modules across UI reorganisation, web attack expansion, network recon, cryptanalysis & CTF utilities, OSINT, and blue-team forensics.

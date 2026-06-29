@@ -15,6 +15,7 @@ from datetime import datetime
 from tkinter import filedialog, ttk
 
 import customtkinter as ctk
+from app.ui.scrollable import autohide_vsb
 
 from app.data.wordlists import WORDLIST
 from app.modules.dir_fuzzer import (
@@ -338,8 +339,9 @@ class FuzzerPage(ctk.CTkFrame):
             tree_frame,
             columns=("path", "code", "cat", "time"),
             show="headings",
+            height=1,
             style="Fuzzer.Treeview",
-            yscrollcommand=vsb.set,
+            yscrollcommand=autohide_vsb(vsb),
         )
         vsb.configure(command=self._tree.yview)
         self._tree.grid(row=0, column=0, sticky="nsew")

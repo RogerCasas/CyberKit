@@ -154,10 +154,8 @@ class SslAnalyserPage(ctk.CTkFrame):
         )
         self._cert_placeholder.place(relx=0.5, rely=0.55, anchor="center")
 
-        self._cert_scroll = ctk.CTkScrollableFrame(
+        self._cert_scroll = ctk.CTkFrame(
             card, fg_color="transparent", corner_radius=0,
-            scrollbar_button_color=BORDER_COLOR,
-            scrollbar_button_hover_color=TEXT_DIM,
         )
         self._cert_scroll.grid_columnconfigure(1, weight=1)
         # Not gridded until first result

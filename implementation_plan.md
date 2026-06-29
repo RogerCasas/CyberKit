@@ -1,7 +1,7 @@
 # CyberKit — Implementation Plan (SDD Index)
 
 > **SDD workflow:** spec → implement → changelog → promote.
-> New feature? Run `/sdd-next-spec`. Feature shipped? Run `/changelog`.
+> New feature? Run `/sdd-next-spec`. Feature shipped? Run `/sdd-changelog`.
 > Constitution: [`mission.md`](mission.md) · [`roadmap.md`](roadmap.md) · [`tech-stack.md`](tech-stack.md)
 
 ## Spec Index
