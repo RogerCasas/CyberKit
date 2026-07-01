@@ -143,13 +143,13 @@ Categories introduced in v4.0 (applied retroactively to all existing tools):
 
 ---
 
-## v4.2 — Network Recon Expansion
+## v4.2 — Network Recon Expansion ✅ Complete
 
-| Module | Category | Core technique |
-|---|---|---|
-| **Traceroute** | Network / Recon | ICMP/UDP TTL-escalation probes; hop-by-hop latency + reverse-DNS |
-| **Banner Grabber** | Network / Recon | Raw TCP connect; service banner capture (SSH, FTP, SMTP, HTTP) |
-| **Packet Sniffer** | Network / Recon | Scapy passive capture; live table of src/dst/protocol/port ⚠ admin required |
+| Module | Category | Core technique | Status |
+|---|---|---|---|
+| **Traceroute** | Network / Recon | ICMP/UDP TTL-escalation probes; hop-by-hop latency + reverse-DNS | ✅ Done |
+| **Banner Grabber** | Network / Recon | Raw TCP connect; service banner capture (SSH, FTP, SMTP, HTTP) | ✅ Done |
+| **Packet Sniffer** | Network / Recon | Scapy passive capture; live table of src/dst/protocol/port ⚠ admin required | ✅ Done |
 
 **Traceroute** — Send probes with incrementing TTL and display a live table of hop index, IP, reverse-DNS hostname, and RTT for each hop. Teaches routing, BGP handoff points, and geographic topology.
 

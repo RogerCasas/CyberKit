@@ -24,6 +24,9 @@ from app.ui.pages.csrf_analyser import CsrfAnalyserPage
 from app.ui.pages.open_redirect import OpenRedirectPage
 from app.ui.pages.wordlist_generator import WordlistGeneratorPage
 from app.ui.pages.arp_scanner import ARPScannerPage
+from app.ui.pages.traceroute import TraceRoutePage
+from app.ui.pages.banner_grabber import BannerGrabberPage
+from app.ui.pages.packet_sniffer import PacketSnifferPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -100,6 +103,9 @@ class AppWindow(ctk.CTk):
         self._add_page("open_redirect",     OpenRedirectPage)
         self._add_page("wordlist_generator",WordlistGeneratorPage, navigate_callback=self.show_page)
         self._add_page("arp_scanner",       ARPScannerPage)
+        self._add_page("traceroute",        TraceRoutePage)
+        self._add_page("banner_grabber",    BannerGrabberPage)
+        self._add_page("packet_sniffer",    PacketSnifferPage)
 
     # ── Navigation ────────────────────────────────────────────────────────────
 
