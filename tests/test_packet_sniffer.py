@@ -121,7 +121,7 @@ def test_capture_stop_event_before_start():
     def fake_sniff(**kwargs):
         called.append(1)
 
-    with patch("app.modules.packet_sniffer.sniff", side_effect=fake_sniff):
+    with patch("scapy.sendrecv.sniff", side_effect=fake_sniff):
         capture("eth0", stop_event=ev, on_packet=lambda r: None)
 
     assert called == [], "stop_event already set → sniff never called"
@@ -149,7 +149,7 @@ def test_capture_row_limit():
         if len(collected) >= 5:
             ev.set()
 
-    with patch("app.modules.packet_sniffer.sniff", side_effect=fake_sniff):
+    with patch("scapy.sendrecv.sniff", side_effect=fake_sniff):
         with patch("app.modules.packet_sniffer._resolve_iface", return_value="eth0"):
             capture("eth0", row_limit=5, stop_event=ev, on_packet=on_pkt)
 

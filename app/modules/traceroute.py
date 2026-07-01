@@ -11,13 +11,6 @@ import time
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-try:
-    from scapy.layers.inet import IP, ICMP, UDP  # type: ignore
-    from scapy.sendrecv import sr1               # type: ignore
-    _SCAPY_OK = True
-except ImportError:
-    _SCAPY_OK = False
-
 
 @dataclass
 class TraceHop:
@@ -52,7 +45,10 @@ def scan(
     Calls on_hop(TraceHop) for each TTL step as results arrive.
     Returns the full list of TraceHop objects.
     """
-    if not _SCAPY_OK:
+    try:
+        from scapy.layers.inet import IP, ICMP, UDP  # type: ignore
+        from scapy.sendrecv import sr1               # type: ignore
+    except ImportError:
         return []
 
     try:

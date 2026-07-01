@@ -11,13 +11,6 @@ import sys
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-try:
-    from scapy.sendrecv import sniff        # type: ignore
-    from scapy.config import conf           # type: ignore
-    _SCAPY_OK = True
-except ImportError:
-    _SCAPY_OK = False
-
 
 @dataclass
 class PacketRow:
@@ -45,9 +38,8 @@ def list_interfaces() -> list[str]:
     On Windows with Npcap, these are friendly names (e.g. "Wi-Fi").
     Falls back to network GUIDs if friendly names are unavailable.
     """
-    if not _SCAPY_OK:
-        return ["(scapy unavailable)"]
     try:
+        from scapy.config import conf  # type: ignore
         names = []
         for iface in conf.ifaces.values():
             name = (getattr(iface, "description", None)
@@ -55,15 +47,16 @@ def list_interfaces() -> list[str]:
             if name:
                 names.append(name)
         return names or ["(no interfaces found)"]
+    except ImportError:
+        return ["(scapy unavailable)"]
     except Exception:
         return ["(error listing interfaces)"]
 
 
 def _resolve_iface(display_name: str) -> str:
     """Return the Scapy network name (GUID on Windows) for a display name."""
-    if not _SCAPY_OK:
-        return display_name
     try:
+        from scapy.config import conf  # type: ignore
         for iface in conf.ifaces.values():
             desc = (getattr(iface, "description", None)
                     or getattr(iface, "name", None))
@@ -129,7 +122,9 @@ def capture(
     Start passive capture on display_iface. Calls on_packet(PacketRow) for
     each captured frame. Returns when stop_event is set or row_limit reached.
     """
-    if not _SCAPY_OK:
+    try:
+        from scapy.sendrecv import sniff  # type: ignore
+    except ImportError:
         return
 
     iface = _resolve_iface(display_iface)

@@ -58,7 +58,7 @@ def test_tracehop_timed_out():
 def test_scan_stop_event_before_start():
     ev = threading.Event()
     ev.set()
-    with patch("app.modules.traceroute.sr1", return_value=None):
+    with patch("scapy.sendrecv.sr1", return_value=None):
         result = scan("1.2.3.4", stop_event=ev)
     assert result == [], "Pre-set stop_event should yield no hops"
     print("  scan stop_event pre-set → []: OK")
@@ -74,7 +74,7 @@ def test_scan_timeout_hop():
         return None   # simulate timeout
 
     # Only 2 hops max so test is fast
-    with patch("app.modules.traceroute.sr1", side_effect=fake_sr1):
+    with patch("scapy.sendrecv.sr1", side_effect=fake_sr1):
         with patch("socket.gethostbyname", return_value="1.2.3.4"):
             result = scan("1.2.3.4", max_hops=2)
 
@@ -92,7 +92,7 @@ def test_scan_on_hop_callback():
     def fake_sr1(probe, timeout, verbose):
         return None  # all timeouts
 
-    with patch("app.modules.traceroute.sr1", side_effect=fake_sr1):
+    with patch("scapy.sendrecv.sr1", side_effect=fake_sr1):
         with patch("socket.gethostbyname", return_value="1.2.3.4"):
             scan("1.2.3.4", max_hops=3, on_hop=collected.append)
 
@@ -113,7 +113,7 @@ def test_scan_terminates_on_echo_reply():
             return _icmp_reply("5.5.5.5", icmp_type=0)  # Echo Reply
         return _icmp_reply("1.1.1.1", icmp_type=11)     # Time Exceeded
 
-    with patch("app.modules.traceroute.sr1", side_effect=fake_sr1):
+    with patch("scapy.sendrecv.sr1", side_effect=fake_sr1):
         with patch("socket.gethostbyaddr", side_effect=Exception("no rdns")):
             result = scan("5.5.5.5", max_hops=30)
 
@@ -129,7 +129,7 @@ def test_scan_hop_sequence():
     def fake_sr1(probe, timeout, verbose):
         return None  # all timeouts
 
-    with patch("app.modules.traceroute.sr1", side_effect=fake_sr1):
+    with patch("scapy.sendrecv.sr1", side_effect=fake_sr1):
         with patch("socket.gethostbyname", return_value="192.0.2.1"):
             result = scan("example.com", max_hops=4)
 
