@@ -45,6 +45,9 @@ CATEGORIES: list[Category] = [
     Category("dns_osint", "DNS & OSINT", [
         ToolEntry("DNS Enumerator",  "🌐", "dns_enumerator"),
         ToolEntry("WHOIS & Geo",     "🌍", "whois_geo"),
+        ToolEntry("Email Headers",   "📧", "email_header"),
+        ToolEntry("Robots & Sitemap","🤖", "robots_sitemap"),
+        ToolEntry("CVE Lookup",      "🔎", "cve_lookup"),
     ]),
     Category("crypto_encoding", "Cryptanalysis & Encoding", [
         ToolEntry("Hash Tool",       "#",  "hash_tool"),

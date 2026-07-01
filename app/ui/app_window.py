@@ -29,6 +29,9 @@ from app.ui.pages.banner_grabber import BannerGrabberPage
 from app.ui.pages.packet_sniffer import PacketSnifferPage
 from app.ui.pages.jwt_tool import JwtToolPage
 from app.ui.pages.cipher_solver import CipherSolverPage
+from app.ui.pages.email_header import EmailHeaderPage
+from app.ui.pages.robots_sitemap import RobotsSitemapPage
+from app.ui.pages.cve_lookup import CveLookupPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -110,6 +113,9 @@ class AppWindow(ctk.CTk):
         self._add_page("packet_sniffer",    PacketSnifferPage)
         self._add_page("jwt_tool",          JwtToolPage)
         self._add_page("cipher_solver",     CipherSolverPage)
+        self._add_page("email_header",      EmailHeaderPage)
+        self._add_page("robots_sitemap",    RobotsSitemapPage)
+        self._add_page("cve_lookup",        CveLookupPage)
 
     # ── Navigation ────────────────────────────────────────────────────────────
 

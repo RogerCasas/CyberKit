@@ -152,6 +152,24 @@ CARD_DATA: dict[str, dict] = {
         "desc": "Paste ciphertext to identify and solve Caesar, Vigenère, XOR, and Rail Fence ciphers with one click.",
         "tag": "Active", "tag_color": "#22c55e",
     },
+    "email_header": {
+        "icon": "📧",
+        "title": "Email Header Analyser",
+        "desc": "Paste raw email headers to reconstruct relay hops, evaluate SPF/DKIM/DMARC results, and flag suspicious patterns.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "robots_sitemap": {
+        "icon": "🤖",
+        "title": "Robots & Sitemap",
+        "desc": "Fetch and parse robots.txt (disallowed paths, sitemaps) and sitemap XML files to map a target's exposed URL structure.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "cve_lookup": {
+        "icon": "🔎",
+        "title": "CVE Lookup",
+        "desc": "Query the NIST NVD database by product and version to find known CVEs sorted by CVSS score.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
 }
 
 TAG_BG_MAP = {

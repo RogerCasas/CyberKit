@@ -4,6 +4,21 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-07-01 — v4.4 OSINT & Information Gathering
+
+- Added **Email Header Analyser** module (`app/modules/email_header.py`): paste a raw email header block and extract every relay hop (oldest-first) with sender host, receiver MTA, IP, timestamp, and inter-hop time delta. Evaluates SPF, DKIM, and DMARC result strings from `Authentication-Results:` headers (text extraction via stdlib `email.parser` — no cryptographic re-verification). Flags suspicious patterns: large time gaps between hops (> 1 hour), missing `Authentication-Results` header, and SPF/DKIM/DMARC `fail`, `softfail`, `none`, or `permerror` results.
+- Added **Robots.txt & Sitemap Parser** module (`app/modules/robots_sitemap.py`): enter a domain to fetch and parse `robots.txt` (disallowed paths grouped by `User-agent`, `Sitemap:` directives, raw text view) and any referenced sitemap XML files (both `<urlset>` and `<sitemapindex>` with one level of child-sitemap recursion). When `robots.txt` declares no sitemaps, automatically probes `/sitemap.xml` then `/sitemap_index.xml` as fallbacks. Displays a clear "no sitemap found" message when no XML sitemap exists at any standard path, rather than leaving the table silently empty.
+- Added **CVE / Vulnerability Lookup** module (`app/modules/cve_lookup.py`): query the NIST NVD REST API v2 by product name and version; results sorted by CVSS score descending with row colouring by severity (CRITICAL red, HIGH orange, MEDIUM yellow, LOW grey). Enforces a 6-second inter-query rate-limit cooldown with a visible countdown label. Extracts CVSSv3.1 scores preferentially, falling back to CVSSv3.0 then CVSSv2. Added inline hint: "No results? Try searching without the version number."
+- Added UI pages for all three modules (`app/ui/pages/email_header.py`, `robots_sitemap.py`, `cve_lookup.py`) following the established page pattern: background threads for all network operations, `queue.Queue` for thread-safe UI updates, Stop buttons where applicable.
+- Email Header Analyser page: paste box → Analyse (synchronous, no thread needed); Message Summary panel; SPF/DKIM/DMARC coloured badge panel (green/amber/red); Relay Hops `ttk.Treeview`; Findings & Warnings panel.
+- Robots & Sitemap page: URL input → background fetch; Directives treeview + raw text panel; Sitemap URLs treeview; explicit "no sitemap" message when none found.
+- CVE Lookup page: Product + Version inputs; Search/Stop buttons; rate-limit countdown; Results treeview with per-severity row tag colours; total-results count label.
+- Wired all three pages into the app router (`app/ui/app_window.py`), DNS & OSINT sidebar category (`app/data/categories.py`), home-page card grid (`app/ui/pages/home.py`), and sidebar version label (`app/ui/sidebar.py` — bumped to `v4.4.0`).
+- Added 15 automated engine tests across three test files (`tests/test_email_header.py` 5 tests, `tests/test_robots_sitemap.py` 5 tests, `tests/test_cve_lookup.py` 5 tests); all use fixture data with no live network calls.
+- Marked v4.4 ✅ Complete in `docs/roadmap.md`.
+
+---
+
 ## 2026-07-01 — v4.3 Cryptanalysis & CTF Utilities
 
 - Added **JWT Forge & Verify** module (`app/modules/jwt_tool.py`): paste any JWT to decode its header and payload into structured JSON panels, attempt an `alg:none` signature-bypass by stripping and re-encoding the token, and brute-force a weak HS256 secret from a wordlist file. Brute-force runs in a background thread with live attempt counter, early-exit on first match, and a Stop button. All cryptographic operations use stdlib only (`base64`, `hmac`, `hashlib`); HMAC comparison uses `hmac.compare_digest` for timing safety.
