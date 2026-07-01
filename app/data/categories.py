@@ -49,6 +49,8 @@ CATEGORIES: list[Category] = [
     Category("crypto_encoding", "Cryptanalysis & Encoding", [
         ToolEntry("Hash Tool",       "#",  "hash_tool"),
         ToolEntry("Encoder/Decoder", "🔤", "encoder_decoder"),
+        ToolEntry("JWT Forge & Verify", "🔑", "jwt_tool"),
+        ToolEntry("Cipher Identifier",  "🔐", "cipher_solver"),
     ]),
     Category("tech_analysis", "Tech Analysis", [
         ToolEntry("Tech Fingerprint","🖥", "tech_fingerprinter"),

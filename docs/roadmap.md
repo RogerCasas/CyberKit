@@ -159,12 +159,12 @@ Categories introduced in v4.0 (applied retroactively to all existing tools):
 
 ---
 
-## v4.3 — Cryptanalysis & CTF Utilities
+## v4.3 — Cryptanalysis & CTF Utilities ✅ Complete
 
-| Module | Category | Core technique |
-|---|---|---|
-| **JWT Forge & Verify** | Cryptanalysis & Encoding | `alg:none` bypass attempt; HS256 secret brute-force via wordlist; decoded header/payload view |
-| **Cipher Identifier & Solver** | Cryptanalysis & Encoding | Index-of-coincidence + frequency analysis → Caesar/Vigenère/XOR/Rail Fence identification + one-click decrypt |
+| Module | Category | Core technique | Status |
+|---|---|---|---|
+| **JWT Forge & Verify** | Cryptanalysis & Encoding | `alg:none` bypass attempt; HS256 secret brute-force via wordlist; decoded header/payload view | ✅ Done |
+| **Cipher Identifier & Solver** | Cryptanalysis & Encoding | Index-of-coincidence + frequency analysis → Caesar/Vigenère/XOR/Rail Fence identification + one-click decrypt | ✅ Done |
 
 **JWT Forge & Verify** — Extends the existing JWT inspection in Encoder/Decoder. Dedicated module: paste a JWT, attempt the `alg: none` bypass, brute-force a weak HS256 secret against a wordlist, and display the structured decoded token. Teaches JWT attack classes that appear in almost every CTF.
 
@@ -210,5 +210,5 @@ Each milestone follows this cycle:
 
 1. **Spec** — `/sdd-next-spec` generates `specs/NN-module-name.md` with requirements, design, and acceptance criteria.
 2. **Implement** — code written against the spec; spec updated if design changes.
-3. **Changelog** — `/changelog` records what shipped.
+3. **Changelog** — `/sdd-changelog` records what shipped.
 4. **Promote** — module card on home page changes from `Coming Soon` to `Active`.
