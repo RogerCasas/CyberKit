@@ -48,6 +48,7 @@ class PacketSnifferPage(ctk.CTkFrame):
         self._poll_id  = None
         self._row_cnt  = 0
         self._ifaces   = list_interfaces()
+        self._packet_details: dict[str, str] = {}   # treeview iid → full packet dump
         self._build()
 
     # ── Build ─────────────────────────────────────────────────────────────────
@@ -59,7 +60,8 @@ class PacketSnifferPage(ctk.CTkFrame):
         self._scroll = ctk.CTkFrame(self, fg_color=BG_MAIN, corner_radius=0)
         self._scroll.grid(row=0, column=0, sticky="nsew")
         self._scroll.grid_columnconfigure(0, weight=1)
-        self._scroll.grid_rowconfigure(3, weight=1)
+        self._scroll.grid_rowconfigure(3, weight=2)
+        self._scroll.grid_rowconfigure(4, weight=1, minsize=180)
 
         # Header
         hdr = ctk.CTkFrame(self._scroll, fg_color="transparent")
@@ -91,6 +93,7 @@ class PacketSnifferPage(ctk.CTkFrame):
 
         self._build_controls()
         self._build_table()
+        self._build_details()
 
     def _build_controls(self):
         ctrl = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
@@ -175,6 +178,15 @@ class PacketSnifferPage(ctk.CTkFrame):
             text_color=TEXT_MUTED, anchor="w",
         )
         self._status_lbl.grid(row=1, column=0, sticky="w", padx=18, pady=(0, 12))
+
+        # Disable capture if no real interfaces are available (e.g. Npcap missing)
+        if self._ifaces and self._ifaces[0].startswith("("):
+            self._start_btn.configure(state="disabled")
+            label = self._ifaces[0].strip("()")
+            self._status_lbl.configure(
+                text=f"⚠  {label}. Download and install Npcap from npcap.com, then restart CyberKit.",
+                text_color=CLR_WARN,
+            )
 
     def _build_table(self):
         wrapper = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
@@ -262,6 +274,38 @@ class PacketSnifferPage(ctk.CTkFrame):
         )
         self._empty_lbl.place(relx=0.5, rely=0.5, anchor="center")
 
+        self._tree.bind("<<TreeviewSelect>>", self._on_packet_select)
+
+    def _build_details(self):
+        wrapper = ctk.CTkFrame(self._scroll, fg_color=BG_CARD, corner_radius=12,
+                               border_width=1, border_color=BORDER_COLOR)
+        wrapper.grid(row=4, column=0, sticky="nsew", padx=30, pady=(0, 30))
+        wrapper.grid_columnconfigure(0, weight=1)
+        wrapper.grid_rowconfigure(1, weight=1)
+
+        top = ctk.CTkFrame(wrapper, fg_color="transparent")
+        top.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 4))
+        top.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            top, text="Packet Details",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text_color=TEXT_MUTED, anchor="w",
+        ).grid(row=0, column=0, sticky="w")
+
+        self._detail_box = ctk.CTkTextbox(
+            wrapper,
+            font=ctk.CTkFont(family="Consolas", size=11),
+            fg_color=BG_INPUT,
+            text_color=TEXT_PRIMARY,
+            border_width=0,
+            wrap="none",
+            state="disabled",
+        )
+        self._detail_box.grid(row=1, column=0, sticky="nsew", padx=16, pady=(0, 12))
+        self._detail_box.configure(state="normal")
+        self._detail_box.insert("1.0", "Select a packet to see its details.")
+        self._detail_box.configure(state="disabled")
+
     # ── Actions ───────────────────────────────────────────────────────────────
 
     def _start(self):
@@ -344,7 +388,7 @@ class PacketSnifferPage(ctk.CTkFrame):
 
     def _insert_row(self, r: PacketRow):
         alt = "row_even" if self._row_cnt % 2 == 0 else "row_odd"
-        self._tree.insert(
+        iid = self._tree.insert(
             "", "end",
             values=(
                 self._row_cnt + 1,
@@ -355,8 +399,20 @@ class PacketSnifferPage(ctk.CTkFrame):
             ),
             tags=(r.proto, alt),
         )
+        if r.details:
+            self._packet_details[iid] = r.details
         self._tree.yview_moveto(1.0)
         self._row_cnt += 1
+
+    def _on_packet_select(self, _event):
+        sel = self._tree.selection()
+        if not sel:
+            return
+        details = self._packet_details.get(sel[0], "No details captured for this packet.")
+        self._detail_box.configure(state="normal")
+        self._detail_box.delete("1.0", "end")
+        self._detail_box.insert("1.0", details)
+        self._detail_box.configure(state="disabled")
 
     def _finish(self):
         self._running = False
@@ -369,7 +425,12 @@ class PacketSnifferPage(ctk.CTkFrame):
 
     def _clear(self):
         self._tree.delete(*self._tree.get_children())
+        self._packet_details.clear()
         self._row_cnt = 0
         self._empty_lbl.place(relx=0.5, rely=0.5, anchor="center")
         self._status_lbl.configure(
             text="Select interface and click Start Capture.", text_color=TEXT_MUTED)
+        self._detail_box.configure(state="normal")
+        self._detail_box.delete("1.0", "end")
+        self._detail_box.insert("1.0", "Select a packet to see its details.")
+        self._detail_box.configure(state="disabled")

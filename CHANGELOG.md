@@ -4,6 +4,18 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-07-01 — v4.2 Packet Sniffer fixes & Packet Details panel
+
+- Fixed the Packet Sniffer failing to list interfaces on Windows with Scapy 2.7.0: `conf.ifaces` is `None` in this version, so interface discovery now falls back to reading the Windows registry (`HKLM\...\Network\{GUID}\Connection\Name`) for friendly names and then `get_if_list()` for raw NPF GUIDs. A module-level cache (`_DISPLAY_TO_NPF`) ensures the dropdown label and the NPF path used by `sniff()` are always consistent.
+- Interface dropdown now shows the adapter's current IP alongside its name (e.g. `Wi-Fi  (192.168.1.5)`) by reading `DhcpIPAddress` / `IPAddress` from the registry, making it easy to match against `ipconfig` output.
+- Fixed "Unable to guess datalink type (linktype=1)" Scapy warning on Windows/Npcap: explicitly importing `Ether` from `scapy.layers.l2` before the first `sniff()` call registers the `DLT_EN10MB → Ether` mapping that Scapy 2.7.0 lazy-loads too late.
+- Fixed ICMP, TCP, and UDP packets not appearing in the capture table: `haslayer("IP")`, `haslayer("ICMP")` etc. require `scapy.layers.inet` to be imported first. Added explicit lazy imports of `IP`, `TCP`, `UDP`, `ICMP`, `IPv6`, and `ICMPv6EchoRequest` inside `capture()` so all protocol layers are registered before the first packet arrives.
+- When no usable interfaces are found (e.g. Npcap not installed), the interface dropdown now shows a clear sentinel and the Start Capture button is disabled with an actionable status message pointing to npcap.com.
+- Added **Packet Details** panel below the capture table: clicking any row shows the full Scapy layer-by-layer dump (`pkt.show(dump=True)`) in a monospaced read-only textbox. Details are stored per treeview item ID and cleared when the table is cleared.
+- Deferred all Scapy imports in `traceroute.py` and `packet_sniffer.py` to inside their worker functions, eliminating the `WARNING: No libpcap provider available` message printed to the terminal on every app startup.
+
+---
+
 ## 2026-06-29 — v4.1 Web Attack Expansion
 
 - Added **XSS Tester** module: injects marker-tagged reflected-XSS payloads (`<script>`, `"><img onerror>`, `<svg onload>`, attribute breakout) into GET/POST parameters and flags any reflected back **unescaped**. Distinguishes raw reflection (vulnerable) from HTML-entity-encoded reflection (safe) and reports the reflection context (HTML body / attribute / script). Detection only — no browser execution.

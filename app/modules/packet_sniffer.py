@@ -20,6 +20,7 @@ class PacketRow:
     sport: Optional[int]
     dport: Optional[int]
     preview: str
+    details: str = ""   # full packet dump shown in the details panel on click
 
 
 # BPF filter strings for each protocol filter option
@@ -32,38 +33,130 @@ _BPF: dict[str, str] = {
 }
 
 
+# Populated by list_interfaces(); keyed by exactly what the dropdown shows.
+# _resolve_iface() reads this so display→NPF mapping is always consistent.
+_DISPLAY_TO_NPF: dict[str, str] = {}
+
+
+def _win_iface_ip(guid: str) -> str:
+    """Return the current IP address for a Windows adapter GUID, or ''."""
+    try:
+        import winreg
+        key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            rf"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{guid}",
+        )
+        for val_name in ("DhcpIPAddress", "IPAddress"):
+            try:
+                val, _ = winreg.QueryValueEx(key, val_name)
+                ip = val[0] if isinstance(val, list) else val
+                if ip and ip != "0.0.0.0":
+                    winreg.CloseKey(key)
+                    return ip
+            except OSError:
+                pass
+        winreg.CloseKey(key)
+    except Exception:
+        pass
+    return ""
+
+
+def _win_build_mapping() -> dict[str, str]:
+    """
+    Read the Windows registry to build {display_label: NPF_device_path}.
+    Display label is "Friendly Name  (IP)" when an IP is available,
+    otherwise just "Friendly Name".
+    Returns empty dict on failure or non-Windows.
+    """
+    if sys.platform != "win32":
+        return {}
+    try:
+        import winreg
+        NET_KEY = (r"SYSTEM\CurrentControlSet\Control\Network"
+                   r"\{4D36E972-E325-11CE-BFC1-08002BE10318}")
+        mapping: dict[str, str] = {}
+        root = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, NET_KEY)
+        i = 0
+        while True:
+            try:
+                guid = winreg.EnumKey(root, i)
+                i += 1
+            except OSError:
+                break
+            try:
+                conn = winreg.OpenKey(root, rf"{guid}\Connection")
+                name, _ = winreg.QueryValueEx(conn, "Name")
+                winreg.CloseKey(conn)
+                ip = _win_iface_ip(guid)
+                label = f"{name}  ({ip})" if ip else name
+                mapping[label] = rf"\Device\NPF_{guid}"
+            except OSError:
+                pass
+        winreg.CloseKey(root)
+        return mapping
+    except Exception:
+        return {}
+
+
 def list_interfaces() -> list[str]:
     """
-    Return display names for available network interfaces.
-    On Windows with Npcap, these are friendly names (e.g. "Wi-Fi").
-    Falls back to network GUIDs if friendly names are unavailable.
+    Return display labels for available network interfaces and cache the
+    display→NPF mapping so _resolve_iface() can translate them back.
+
+    Strategy (first that yields results wins):
+    1. conf.ifaces  — older Scapy versions that populate friendly names.
+    2. Windows registry — friendly name + current IP (e.g. "Wi-Fi  (192.168.1.5)").
+    3. get_if_list() — raw NPF GUIDs; always works when Npcap is installed.
     """
+    global _DISPLAY_TO_NPF
+
+    # Method 1: conf.ifaces
     try:
         from scapy.config import conf  # type: ignore
         names = []
-        for iface in conf.ifaces.values():
+        for iface in (conf.ifaces or {}).values():
             name = (getattr(iface, "description", None)
                     or getattr(iface, "name", None))
             if name:
                 names.append(name)
-        return names or ["(no interfaces found)"]
+        if names:
+            _DISPLAY_TO_NPF = {}   # names ARE the NPF names here; pass-through
+            return names
     except ImportError:
         return ["(scapy unavailable)"]
     except Exception:
-        return ["(error listing interfaces)"]
+        pass
+
+    # Method 2: Windows registry with friendly name + IP
+    mapping = _win_build_mapping()
+    if mapping:
+        _DISPLAY_TO_NPF = mapping
+        return list(mapping.keys())
+
+    # Method 3: raw NPF GUIDs
+    try:
+        from scapy.arch import get_if_list  # type: ignore
+        ifaces = get_if_list()
+        if ifaces:
+            _DISPLAY_TO_NPF = {}   # GUIDs pass through directly
+            return ifaces
+    except Exception:
+        pass
+
+    if sys.platform == "win32":
+        return ["(Npcap not installed)"]
+    return ["(no interfaces found)"]
 
 
 def _resolve_iface(display_name: str) -> str:
-    """Return the Scapy network name (GUID on Windows) for a display name."""
-    try:
-        from scapy.config import conf  # type: ignore
-        for iface in conf.ifaces.values():
-            desc = (getattr(iface, "description", None)
-                    or getattr(iface, "name", None))
-            if desc == display_name:
-                return iface.name
-    except Exception:
-        pass
+    """
+    Translate a dropdown display label back to the NPF device path for sniff().
+    Falls back to returning the name unchanged for raw NPF paths or unknown names.
+    """
+    if display_name.startswith("\\Device\\"):
+        return display_name
+    if display_name in _DISPLAY_TO_NPF:
+        return _DISPLAY_TO_NPF[display_name]
     return display_name
 
 
@@ -105,8 +198,14 @@ def _parse_packet(pkt) -> Optional[PacketRow]:
             raw = pkt["Raw"].load
             preview = raw[:40].decode("ascii", "replace").replace("\x00", ".")
 
+        try:
+            details = pkt.show(dump=True)
+        except Exception:
+            details = ""
+
         return PacketRow(src=src, dst=dst, proto=proto,
-                         sport=sport, dport=dport, preview=preview)
+                         sport=sport, dport=dport, preview=preview,
+                         details=details)
     except Exception:
         return None
 
@@ -123,7 +222,10 @@ def capture(
     each captured frame. Returns when stop_event is set or row_limit reached.
     """
     try:
-        from scapy.sendrecv import sniff  # type: ignore
+        from scapy.sendrecv import sniff                           # type: ignore
+        from scapy.layers.l2 import Ether                         # type: ignore  # registers DLT_EN10MB=1 → Ether
+        from scapy.layers.inet import IP, TCP, UDP, ICMP          # type: ignore  # registers inet layers for haslayer()
+        from scapy.layers.inet6 import IPv6, ICMPv6EchoRequest    # type: ignore  # registers IPv6 layers
     except ImportError:
         return
 
