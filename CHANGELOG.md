@@ -4,6 +4,14 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-07-01 — Fix: File Metadata Extractor — EXIF reading and WhatsApp stripping
+
+- Fixed the image extractor showing a blank table for files with EXIF tags outside the original five-tag whitelist (`Make`, `Model`, `DateTime`, `Software`, `Orientation`). All readable EXIF tags are now shown; only binary blobs and thumbnail data are skipped.
+- Fixed GPS extraction silently failing on the modern `getexif()` code path: the GPS sub-IFD (tag 34853) is returned as a Pillow `IFD` object, not a plain `dict`, so the previous `isinstance(value, dict)` check always evaluated to `False` and GPS was dropped without error. GPS is now decoded via a dedicated helper that handles both object types.
+- When an image has no EXIF block at all (e.g. photos received via WhatsApp or Telegram, which strip metadata for privacy), a grey *Note* row is now shown in the results table explaining the reason, and the status bar reads "No EXIF metadata found." instead of leaving the table silently empty.
+
+---
+
 ## 2026-07-01 — v4.5 Forensics & Blue Team
 
 - Added **Log Analyser** module (`app/modules/log_analyser.py`): open a local log file and automatically detect its format — Apache/Nginx combined access log or SSH `auth.log`. For access logs, extracts top IPs by request count (up to 20), status-code breakdown by group (2xx/3xx/4xx/5xx), and the 10 busiest error-spike hours. For auth logs, extracts failed-password attempts grouped by username and source IP. All parsing runs in a background thread (large files checked every 10 000 lines against a stop event).
