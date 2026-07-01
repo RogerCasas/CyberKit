@@ -4,6 +4,19 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-07-01 — v4.5 Forensics & Blue Team
+
+- Added **Log Analyser** module (`app/modules/log_analyser.py`): open a local log file and automatically detect its format — Apache/Nginx combined access log or SSH `auth.log`. For access logs, extracts top IPs by request count (up to 20), status-code breakdown by group (2xx/3xx/4xx/5xx), and the 10 busiest error-spike hours. For auth logs, extracts failed-password attempts grouped by username and source IP. All parsing runs in a background thread (large files checked every 10 000 lines against a stop event).
+- Added **File Metadata Extractor** module (`app/modules/file_metadata.py`): extract embedded metadata from images (JPEG, PNG, TIFF, WEBP) via `Pillow` (EXIF tags, GPS decimal-degree conversion), PDFs via `pypdf` (title, author, creator, creation/modification dates), Word documents via `python-docx`, and Excel workbooks via `openpyxl` (author, last-modified-by, revision, company). Privacy-sensitive fields (GPS, Author, last-modified-by) are flagged with `sensitive=True` for amber highlighting in the UI. Unknown file types and all errors are handled gracefully — `extract()` never raises.
+- Added **Hash Verifier** module (`app/modules/hash_verifier.py`): compute MD5, SHA-1, SHA-256, and SHA-512 digests for any file in 1 MB chunks with stop-event cancellation and progress callbacks. `verify()` compares a user-supplied expected hash case-insensitively against all four digests and returns the matched algorithm name.
+- Added UI pages for all three modules under a new **Forensics / Blue Team** sidebar category: Log Analyser page (file picker, background thread, 2×2 results grid: Top IPs treeview, status-code coloured labels, error-spike treeview, failed-auth treeview, Copy TSV button); File Metadata page (file picker, synchronous extraction, field/value treeview with amber sensitive-field highlighting, Clear button); Hash Verifier page (file picker, background thread with progress label, four read-only hash fields in monospaced font, expected-hash input + Verify button, large green/red result label).
+- Added `forensics_blue` category to `app/data/categories.py` with three tool entries (Log Analyser, File Metadata, Hash Verifier). Wired all three pages into the app router (`app/ui/app_window.py`), home-page card grid (`app/ui/pages/home.py`), and sidebar version label (`app/ui/sidebar.py` — bumped to `v4.5.0`).
+- Added four new dependencies to `requirements.txt`: `Pillow>=10.0.0`, `pypdf>=4.0.0`, `python-docx>=1.1.0`, `openpyxl>=3.1.0`.
+- Added 15 automated engine tests across three test files (`tests/test_log_analyser.py` 6 tests, `tests/test_file_metadata.py` 4 tests, `tests/test_hash_verifier.py` 5 tests); all use fixture data or temp files with no live network calls.
+- Marked v4.5 ✅ Complete in `docs/roadmap.md`.
+
+---
+
 ## 2026-07-01 — v4.4 OSINT & Information Gathering
 
 - Added **Email Header Analyser** module (`app/modules/email_header.py`): paste a raw email header block and extract every relay hop (oldest-first) with sender host, receiver MTA, IP, timestamp, and inter-hop time delta. Evaluates SPF, DKIM, and DMARC result strings from `Authentication-Results:` headers (text extraction via stdlib `email.parser` — no cryptographic re-verification). Flags suspicious patterns: large time gaps between hops (> 1 hour), missing `Authentication-Results` header, and SPF/DKIM/DMARC `fail`, `softfail`, `none`, or `permerror` results.

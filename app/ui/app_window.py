@@ -32,6 +32,9 @@ from app.ui.pages.cipher_solver import CipherSolverPage
 from app.ui.pages.email_header import EmailHeaderPage
 from app.ui.pages.robots_sitemap import RobotsSitemapPage
 from app.ui.pages.cve_lookup import CveLookupPage
+from app.ui.pages.log_analyser import LogAnalyserPage
+from app.ui.pages.file_metadata import FileMetadataPage
+from app.ui.pages.hash_verifier import HashVerifierPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -116,6 +119,9 @@ class AppWindow(ctk.CTk):
         self._add_page("email_header",      EmailHeaderPage)
         self._add_page("robots_sitemap",    RobotsSitemapPage)
         self._add_page("cve_lookup",        CveLookupPage)
+        self._add_page("log_analyser",      LogAnalyserPage)
+        self._add_page("file_metadata",     FileMetadataPage)
+        self._add_page("hash_verifier",     HashVerifierPage)
 
     # ── Navigation ────────────────────────────────────────────────────────────
 

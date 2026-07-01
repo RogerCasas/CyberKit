@@ -188,13 +188,13 @@ Categories introduced in v4.0 (applied retroactively to all existing tools):
 
 ---
 
-## v4.5 — Forensics & Blue Team
+## v4.5 — Forensics & Blue Team ✅ Complete
 
-| Module | Category | Core technique |
-|---|---|---|
-| **Log Analyser** | Forensics / Blue Team | Apache/Nginx access log + auth.log parsing; top IPs, error spikes, failed-auth patterns |
-| **File Metadata Extractor** | Forensics / Blue Team | EXIF (images), PDF/Office metadata; GPS, author, creation tool extraction |
-| **Hash Verifier** | Forensics / Blue Team | Compute MD5/SHA-1/SHA-256/SHA-512 for a file; compare against expected hash string |
+| Module | Category | Core technique | Status |
+|---|---|---|---|
+| **Log Analyser** | Forensics / Blue Team | Apache/Nginx access log + auth.log parsing; top IPs, error spikes, failed-auth patterns | ✅ Done |
+| **File Metadata Extractor** | Forensics / Blue Team | EXIF (images), PDF/Office metadata; GPS, author, creation tool extraction | ✅ Done |
+| **Hash Verifier** | Forensics / Blue Team | Compute MD5/SHA-1/SHA-256/SHA-512 for a file; compare against expected hash string | ✅ Done |
 
 **Log Analyser** — Open a local log file (Apache/Nginx access log, SSH `auth.log`, or Windows Event Log exported as CSV) and surface: top IPs by request count, 4xx/5xx error rate over time, failed SSH login attempts, and potential directory-traversal patterns. Teaches log-based threat hunting.
 
