@@ -4,6 +4,23 @@ All notable changes to CyberKit are recorded here, grouped by release date.
 
 ---
 
+## 2026-07-01 — v4.3 Cryptanalysis & CTF Utilities
+
+- Added **JWT Forge & Verify** module (`app/modules/jwt_tool.py`): paste any JWT to decode its header and payload into structured JSON panels, attempt an `alg:none` signature-bypass by stripping and re-encoding the token, and brute-force a weak HS256 secret from a wordlist file. Brute-force runs in a background thread with live attempt counter, early-exit on first match, and a Stop button. All cryptographic operations use stdlib only (`base64`, `hmac`, `hashlib`); HMAC comparison uses `hmac.compare_digest` for timing safety.
+- Added **Cipher Identifier & Solver** module (`app/modules/cipher_solver.py`): paste ciphertext and the engine runs four independent analysers (Caesar, Vigenère, XOR, Rail Fence) ranked by a unified bigram confidence score. Identification uses index-of-coincidence, per-column chi-squared frequency analysis, ciphertext IC check, and ASCII alpha-ratio discrimination so that XOR output (non-letter bytes) is correctly separated from purely alphabetic ciphers. Clicking a candidate row auto-fills the key and shows the plaintext immediately; keys can be edited manually and re-applied with the Solve button.
+- Caesar analyser: selects the shift with the lowest chi-squared against English letter frequencies; reports confidence as the bigram score of the decrypted text.
+- Vigenère analyser: tries all key lengths from 1 to `min(20, n÷20)`, recovers each key by per-column chi-squared frequency analysis, picks the key length whose decrypted text achieves the highest bigram score. Degenerate cases (key-length 1, all-identical key characters, high ciphertext IC ≥ 0.062) are penalised so that Caesar ciphertext is not mis-identified as Vigenère.
+- XOR analyser: tries all 256 single-byte keys; candidate must produce ≥ 70 % printable ASCII; final key selected by lowest chi-squared on the letter-only slice; confidence capped at 0.92.
+- Rail Fence analyser: tries 2–10 rails; picks the rail count whose decrypted text has the highest bigram score (letter frequencies are identical for all transpositions, making bigram adjacency the only discriminator).
+- Alpha-ratio post-processing in `identify()`: if ciphertext has < 25 % ASCII letters, Caesar, Vigenère, and Rail Fence confidences are scaled down proportionally, ensuring XOR is ranked first for binary/non-printable ciphertext.
+- Added UI page `app/ui/pages/jwt_tool.py`: token input → Decode → Header/Payload JSON panels; Panel A — alg:none forge + copy to clipboard; Panel B — wordlist file picker, Start/Stop brute-force, live status label.
+- Added UI page `app/ui/pages/cipher_solver.py`: ciphertext input → Identify → ranked candidates Treeview (Rank / Cipher / Confidence / Auto-Key); click row to fill key entry and display plaintext; manual Solve button for user-edited keys.
+- Wired both pages into the app router (`app/ui/app_window.py`), category registry (`app/data/categories.py`), home-page card grid (`app/ui/pages/home.py`), and sidebar version label (`app/ui/sidebar.py` — bumped to `v4.3.0`).
+- Added 8 automated tests for the cipher engine (`tests/test_cipher_solver.py`) and 7 for the JWT engine (`tests/test_jwt_tool.py`); all 15 pass.
+- Marked v4.3 ✅ Complete in `docs/roadmap.md`.
+
+---
+
 ## 2026-07-01 — v4.2 Packet Sniffer fixes & Packet Details panel
 
 - Fixed the Packet Sniffer failing to list interfaces on Windows with Scapy 2.7.0: `conf.ifaces` is `None` in this version, so interface discovery now falls back to reading the Windows registry (`HKLM\...\Network\{GUID}\Connection\Name`) for friendly names and then `get_if_list()` for raw NPF GUIDs. A module-level cache (`_DISPLAY_TO_NPF`) ensures the dropdown label and the NPF path used by `sniff()` are always consistent.

@@ -171,7 +171,7 @@ class Sidebar(ctk.CTkFrame):
 
         # ── Version label ─────────────────────────────────────────────────────
         self._version_label = ctk.CTkLabel(
-            self, text="v4.2.0",
+            self, text="v4.3.0",
             font=ctk.CTkFont(family="Segoe UI", size=10),
             text_color=TEXT_MUTED,
         )
@@ -340,7 +340,7 @@ class Sidebar(ctk.CTkFrame):
         self._hide_tooltip()
         self._logo_label.configure(text="⚡ CyberKit")
         self._section_label.configure(text="MODULES")
-        self._version_label.configure(text="v4.2.0")
+        self._version_label.configure(text="v4.3.0")
         self._toggle_btn.configure(text="◀")
         self.configure(width=SIDEBAR_W_EXPANDED)
 

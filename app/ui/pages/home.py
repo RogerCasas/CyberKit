@@ -140,6 +140,18 @@ CARD_DATA: dict[str, dict] = {
         "desc": "Generate custom wordlists via charset brute-force or seed-phrase mutation (leet, caps, suffixes). Export to .txt.",
         "tag": "Active", "tag_color": "#22c55e",
     },
+    "jwt_tool": {
+        "icon": "🔑",
+        "title": "JWT Forge & Verify",
+        "desc": "Decode JWTs, forge alg:none bypass tokens, and brute-force weak HS256 secrets against a wordlist.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "cipher_solver": {
+        "icon": "🔐",
+        "title": "Cipher Identifier",
+        "desc": "Paste ciphertext to identify and solve Caesar, Vigenère, XOR, and Rail Fence ciphers with one click.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
 }
 
 TAG_BG_MAP = {

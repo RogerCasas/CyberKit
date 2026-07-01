@@ -27,6 +27,8 @@ from app.ui.pages.arp_scanner import ARPScannerPage
 from app.ui.pages.traceroute import TraceRoutePage
 from app.ui.pages.banner_grabber import BannerGrabberPage
 from app.ui.pages.packet_sniffer import PacketSnifferPage
+from app.ui.pages.jwt_tool import JwtToolPage
+from app.ui.pages.cipher_solver import CipherSolverPage
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 ctk.set_appearance_mode("dark")
@@ -106,6 +108,8 @@ class AppWindow(ctk.CTk):
         self._add_page("traceroute",        TraceRoutePage)
         self._add_page("banner_grabber",    BannerGrabberPage)
         self._add_page("packet_sniffer",    PacketSnifferPage)
+        self._add_page("jwt_tool",          JwtToolPage)
+        self._add_page("cipher_solver",     CipherSolverPage)
 
     # ── Navigation ────────────────────────────────────────────────────────────
 
