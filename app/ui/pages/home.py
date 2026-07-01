@@ -170,6 +170,24 @@ CARD_DATA: dict[str, dict] = {
         "desc": "Query the NIST NVD database by product and version to find known CVEs sorted by CVSS score.",
         "tag": "Active", "tag_color": "#22c55e",
     },
+    "log_analyser": {
+        "icon": "📋",
+        "title": "Log Analyser",
+        "desc": "Parse Apache/Nginx access logs and SSH auth logs — top IPs, status codes, error spikes, and failed-auth counts.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "file_metadata": {
+        "icon": "🔍",
+        "title": "File Metadata",
+        "desc": "Extract EXIF (GPS, camera), PDF document info, and Office core properties from images, PDFs, .docx, and .xlsx files.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
+    "hash_verifier": {
+        "icon": "✅",
+        "title": "Hash Verifier",
+        "desc": "Compute MD5, SHA-1, SHA-256, and SHA-512 digests for any file and verify integrity against an expected hash.",
+        "tag": "Active", "tag_color": "#22c55e",
+    },
 }
 
 TAG_BG_MAP = {

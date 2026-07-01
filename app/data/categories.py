@@ -62,6 +62,11 @@ CATEGORIES: list[Category] = [
     Category("wordlist_utils", "Wordlist & Utilities", [
         ToolEntry("Wordlist Gen",    "📝", "wordlist_generator"),
     ]),
+    Category("forensics_blue", "Forensics / Blue Team", [
+        ToolEntry("Log Analyser",    "📋", "log_analyser"),
+        ToolEntry("File Metadata",   "🔍", "file_metadata"),
+        ToolEntry("Hash Verifier",   "✅", "hash_verifier"),
+    ]),
 ]
 
 # Reverse map: page_key → category key (excludes "home" which has no category)
