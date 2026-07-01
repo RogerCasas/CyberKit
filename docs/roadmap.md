@@ -172,13 +172,13 @@ Categories introduced in v4.0 (applied retroactively to all existing tools):
 
 ---
 
-## v4.4 — OSINT & Information Gathering
+## v4.4 — OSINT & Information Gathering ✅ Complete
 
-| Module | Category | Core technique |
-|---|---|---|
-| **Email Header Analyser** | DNS & OSINT | Raw email header parse; relay hops, SPF/DKIM/DMARC evaluation, timestamp deltas |
-| **Robots.txt & Sitemap Parser** | DNS & OSINT | Fetch/parse `robots.txt` and `sitemap.xml`; disallowed paths + sitemap URL tree |
-| **CVE / Vulnerability Lookup** | DNS & OSINT | NVD public API query by product+version; CVE ID, CVSS score, summary |
+| Module | Category | Core technique | Status |
+|---|---|---|---|
+| **Email Header Analyser** | DNS & OSINT | Raw email header parse; relay hops, SPF/DKIM/DMARC evaluation, timestamp deltas | ✅ Done |
+| **Robots.txt & Sitemap Parser** | DNS & OSINT | Fetch/parse `robots.txt` and `sitemap.xml`; disallowed paths + sitemap URL tree | ✅ Done |
+| **CVE / Vulnerability Lookup** | DNS & OSINT | NVD public API query by product+version; CVE ID, CVSS score, summary | ✅ Done |
 
 **Email Header Analyser** — Paste a raw email header (from "View Source" in any mail client) and extract: every relay hop with timestamp and IP, SPF/DKIM/DMARC pass/fail status, and any suspicious timestamp gaps. Teaches phishing investigation and mail-server forensics.
 
