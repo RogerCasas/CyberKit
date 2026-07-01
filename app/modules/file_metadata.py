@@ -48,8 +48,46 @@ def _gps_to_decimal(rationals, ref: str) -> float:
 
 # ── Image extractor ───────────────────────────────────────────────────────────
 
-_WANTED_TAGS = {"Make", "Model", "DateTime", "Software", "Orientation"}
-_SENSITIVE_TAGS = {"GPSLatitude", "GPSLongitude", "GPSAltitude", "Author"}
+# Tags that contain raw binary data or large thumbnail blobs — skip them.
+_SKIP_TAGS = {
+    "MakerNote", "UserComment", "JPEGThumbnail", "PrintImageMatching",
+    "InteropOffset", "ExifOffset", "GPSInfo",  # GPSInfo handled separately
+}
+_SENSITIVE_TAGS = {"GPS Latitude", "GPS Longitude", "GPS Altitude", "Author",
+                   "GPSLatitude", "GPSLongitude"}
+
+
+def _decode_gps_ifd(gps_ifd) -> list[MetaField]:
+    """Extract GPS fields from either a plain dict or a Pillow IFD object."""
+    from PIL import ExifTags  # type: ignore
+    fields: list[MetaField] = []
+    GPS_TAGS = ExifTags.GPSTAGS
+
+    # Normalise: IFD objects from getexif() are iterable like dicts
+    try:
+        gps = {GPS_TAGS.get(k, str(k)): v for k, v in gps_ifd.items()}
+    except Exception:
+        return fields
+
+    try:
+        lat = _gps_to_decimal(gps["GPSLatitude"], gps.get("GPSLatitudeRef", "N"))
+        lon = _gps_to_decimal(gps["GPSLongitude"], gps.get("GPSLongitudeRef", "E"))
+        fields.append(MetaField("GPS Latitude",  str(lat), sensitive=True))
+        fields.append(MetaField("GPS Longitude", str(lon), sensitive=True))
+    except Exception:
+        pass
+
+    if "GPSAltitude" in gps:
+        try:
+            alt = _gps_to_decimal([gps["GPSAltitude"], (1, 1), (0, 1)], "N")
+            fields.append(MetaField("GPS Altitude", f"{alt:.1f} m", sensitive=True))
+        except Exception:
+            pass
+
+    return fields
+
+
+_GPS_TAG_ID = 34853  # ExifTags.TAGS key for "GPSInfo"
 
 
 def _extract_image(path: str) -> MetaResult:
@@ -58,35 +96,59 @@ def _extract_image(path: str) -> MetaResult:
     img = Image.open(path)
     fields: list[MetaField] = []
 
-    raw_exif = img._getexif() if hasattr(img, "_getexif") else None
-    if raw_exif is None:
+    # Try the modern public API first; fall back to the JPEG-specific private one.
+    exif_obj = None
+    try:
+        exif_obj = img.getexif()
+    except Exception:
+        pass
+
+    raw_exif: dict = {}
+    if exif_obj:
+        raw_exif = dict(exif_obj)
+
+    # If getexif() gave nothing, try the JPEG-specific _getexif()
+    if not raw_exif and hasattr(img, "_getexif"):
         try:
-            raw_exif = dict(img.getexif())
+            got = img._getexif()
+            if got:
+                raw_exif = got
         except Exception:
-            raw_exif = {}
+            pass
 
     if not raw_exif:
+        # Image opened fine but no EXIF block exists at all (common for
+        # WhatsApp images — the app strips metadata before delivery).
+        fields.append(MetaField(
+            "Note",
+            "No EXIF metadata found. Messaging apps (WhatsApp, Telegram) "
+            "strip image metadata for privacy before delivery.",
+            sensitive=False,
+        ))
         return MetaResult(path, "image", fields)
 
-    tag_names = {v: k for k, v in ExifTags.TAGS.items()}
+    # Handle GPS sub-IFD — it lives at tag 34853 in both code paths but the
+    # value type differs: _getexif() gives a plain dict, getexif() gives an IFD.
+    gps_value = raw_exif.pop(_GPS_TAG_ID, None)
+    if gps_value is not None:
+        fields.extend(_decode_gps_ifd(gps_value))
 
+    # Also check by name in case it came through differently
     for tag_id, value in raw_exif.items():
         tag_name = ExifTags.TAGS.get(tag_id, str(tag_id))
 
-        if tag_name == "GPSInfo" and isinstance(value, dict):
-            GPS_TAGS = ExifTags.GPSTAGS
-            gps = {GPS_TAGS.get(k, k): v for k, v in value.items()}
-            try:
-                lat = _gps_to_decimal(gps["GPSLatitude"], gps.get("GPSLatitudeRef", "N"))
-                lon = _gps_to_decimal(gps["GPSLongitude"], gps.get("GPSLongitudeRef", "E"))
-                fields.append(MetaField("GPS Latitude",  str(lat),             sensitive=True))
-                fields.append(MetaField("GPS Longitude", str(lon),             sensitive=True))
-            except Exception:
-                pass
+        if tag_name in _SKIP_TAGS:
             continue
 
-        if tag_name in _WANTED_TAGS:
-            fields.append(MetaField(tag_name, str(value), sensitive=(tag_name in _SENSITIVE_TAGS)))
+        # Skip raw bytes and very long values
+        if isinstance(value, bytes):
+            continue
+        str_value = str(value)
+        if len(str_value) > 200:
+            str_value = str_value[:197] + "…"
+
+        is_sensitive = tag_name in _SENSITIVE_TAGS
+        fields.append(MetaField(tag_name, str_value, sensitive=is_sensitive))
 
     return MetaResult(path, "image", fields)
 

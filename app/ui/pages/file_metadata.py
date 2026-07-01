@@ -142,6 +142,7 @@ class FileMetadataPage(ctk.CTkFrame):
         self._tree.column("field", width=180, anchor="w")
         self._tree.column("value", width=600, anchor="w")
         self._tree.tag_configure("sensitive", foreground=CLR_SENSITIVE)
+        self._tree.tag_configure("note", foreground=TEXT_DIM)
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self._tree.yview)
         self._tree.configure(yscrollcommand=vsb.set)
@@ -197,16 +198,28 @@ class FileMetadataPage(ctk.CTkFrame):
             self._status_lbl.configure(text="No metadata found in this file.", text_color=TEXT_MUTED)
             return
 
+        # Note fields (e.g. "metadata stripped by WhatsApp") use a distinct dim style
         for f in result.fields:
-            tag = ("sensitive",) if f.sensitive else ()
+            if f.key == "Note":
+                tag = ("note",)
+            elif f.sensitive:
+                tag = ("sensitive",)
+            else:
+                tag = ()
             self._tree.insert("", "end", values=(f.key, f.value), tags=tag)
 
-        count = len(result.fields)
-        sens  = sum(1 for f in result.fields if f.sensitive)
-        self._status_lbl.configure(
-            text=f"{count} field(s) extracted · {sens} sensitive",
-            text_color=CLR_OK if not sens else CLR_SENSITIVE,
-        )
+        real_fields = [f for f in result.fields if f.key != "Note"]
+        count = len(real_fields)
+        sens  = sum(1 for f in real_fields if f.sensitive)
+
+        if count == 0:
+            # Only a Note field — no real metadata
+            self._status_lbl.configure(text="No EXIF metadata found.", text_color=TEXT_MUTED)
+        else:
+            self._status_lbl.configure(
+                text=f"{count} field(s) extracted · {sens} sensitive",
+                text_color=CLR_OK if not sens else CLR_SENSITIVE,
+            )
 
     def _clear(self):
         self._clear_tree()
